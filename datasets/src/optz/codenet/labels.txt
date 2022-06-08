@@ -1,0 +1,5 @@
+0 BST  
+1 CAP  
+2 GEO  
+3 LIM  
+4 SUM

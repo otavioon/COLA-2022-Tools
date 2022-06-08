@@ -1,0 +1,41 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define int long long int
+#define until(x) while(!(x))
+#define unless(x) if(!(x))
+#define all(x) (x).begin(),(x).end()
+
+int32_t main(){
+	string s;
+	int k;
+	cin>>s>>k;
+	int st=0,fn=0,md=0;
+	int n = s.length();
+	for(int i=0;s[i]==s[0];i++){
+		st++;
+	}
+	for(int i=n-1;s[i]==s[0];i--){
+		fn++;
+	}
+	for(int i=st+1;i<n;i++){
+		if(s[i-1]==s[i]){
+			md++;
+			i++;
+		}
+	}
+	//cout<<st<<" "<<fn<<" "<<md<<"\n";
+	if(st==n){
+		cout<<(n*k)/2;
+		return 0;
+	}
+	if(k==1){
+		cout<<st/2 + md;
+		return 0;
+	}
+	if(s[0]!=s[n-1]){
+		cout<<(st/2 + md)*k;
+	}
+	else {
+		cout<<(st/2 + ((st+fn)/2)*(k-1) + (md-fn/2)*k + fn/2 );
+	}
+}

@@ -1,0 +1,42 @@
+#include <iostream>
+#include <vector>
+#include <string>
+
+using namespace std;
+
+
+int change(string s){
+  
+  int ans = 0;
+  
+  char first = s[0];
+
+  for(int i = 1; i < s.length(); i++){
+    char sec = s[i];
+    
+    if(first != sec || first == '0'){
+      first = sec;
+    }else{
+      first = '0';
+      ans++;
+    
+    }
+      
+  }
+  //cout << ans << endl;
+  return ans;
+}
+
+int main(void){
+  
+  string s;
+  long k;
+  cin >> s >> k;
+  
+  long ans = change(s);
+  
+  cout << ans * k << endl;
+  
+  
+  return 0;
+}
