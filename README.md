@@ -1,12 +1,12 @@
-# COLA-2022-Tools
+# Experimental artefact (COLA'22)
+
+This repository contains the experimental artefact used in the paper ``Program Representations for Predictive Compilation: State of Affairs in the Early 20’s''
 
 ## Contents
 
 The repository is organized hierarchically. The directories are:
-- `datasets`: Contains all datasets used in the experiments
-- `scripts`: Contains scripts for executing the experiments (extracting features, executing models, build plots, *etc.*)
-- `results`: Contain results for the experiments
-- `YaCoS`: The YaCos framework
-
-Some additional files:
-- `build_environment.sh`: build the enviroment (clone yacos, download datasets, build docker)
+- Directory `datasets` contains all datasets used in the experiments;
+- Directory `scripts` contains scripts for executing the experiments (extracting features, executing models, plot charts, *etc.*);
+- Directory `results` contains the experimental results;
+- Directory `tools` contains the support tools, including the `YaCos` framework;
+- Directory `docker` contains the scripts to build and execute a Docker container.  
