@@ -4,7 +4,7 @@
 
 The repository is organized hierarchically. The directories are:
 - `datasets`: Contains all datasets used in the experiments
-- `scripts`: Contains scripts for executing the experiments (extracting features, executing models, *etc.*)
+- `scripts`: Contains scripts for executing the experiments (extracting features, executing models, build plots, *etc.*)
 - `results`: Contain results for the experiments
 - `YaCoS`: The YaCos framework
 
