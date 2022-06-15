@@ -29,7 +29,7 @@ RUN wget https://github.com/sharkdp/hyperfine/releases/download/v1.11.0/hyperfin
 RUN pip3 install tensorflow tensorboard protobuf numpy pygraphviz appdirs \
     pandas tqdm absl-py colorit pygmo scikit-learn scipy matplotlib seaborn \
     networkx gensim==3.4.0 six==1.15.0 wget python-Levenshtein nltk angr \
-    spektral pyyaml stellargraph scikit-image
+    spektral pyyaml stellargraph scikit-image jupyter jupyterlab ipython
 
 # YaCos IR2VEC Dependencies
 RUN git clone https://github.com/IITH-Compilers/IR2Vec.git \

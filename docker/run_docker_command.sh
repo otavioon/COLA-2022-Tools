@@ -10,4 +10,4 @@ $CONTAINER_CMD run --interactive --tty --rm \
   --env "SHELL=/bin/bash" \
   --workdir $VOLUME_DIR \
   --volume $VOLUME_DIR:$VOLUME_DIR \
-  $CONTAINER_IMAGE bash
+  $CONTAINER_IMAGE "$@"
