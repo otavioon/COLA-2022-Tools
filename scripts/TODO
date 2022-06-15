@@ -1,0 +1,10 @@
+** não é possível gerar inst2vec para loop/anghabench e optz/codenet
+   - então tem que acertar scripts para não gerar esta representação
+   - script gera todas
+
+** tem que adicionar geração de: prog2image, lbpeq, lbpif
+
+** tem que adicionar scripts para LR, DT, KNN e SVM
+
+** tem que adicionar script para gerar figuras 15, 16 e 17
+

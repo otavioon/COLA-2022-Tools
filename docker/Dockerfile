@@ -21,7 +21,8 @@ RUN DEBIAN_FRONTEND="noninteractive" TZ="America/Sao_Paulo" \
 
 RUN update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-10 100 \
     && update-alternatives --install /usr/bin/clang clang /usr/bin/clang-10 100 \
-    && update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-10 100
+    && update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-10 100 \
+    && update-alternatives --install /usr/bin/opt opt /usr/bin/opt-10 100
 
 RUN wget https://github.com/sharkdp/hyperfine/releases/download/v1.11.0/hyperfine_1.11.0_amd64.deb \
     && dpkg -i hyperfine_1.11.0_amd64.deb && rm -f hyperfine_1.11.0_amd64.deb
