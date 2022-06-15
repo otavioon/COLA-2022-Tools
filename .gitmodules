@@ -1,0 +1,3 @@
+[submodule "YaCoS"]
+	path = YaCoS
+	url = https://github.com/ComputerSystemsLaboratory/YaCoS.git
