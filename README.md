@@ -1,6 +1,6 @@
 # Experimental artefact (COLA'22)
 
-This repository contains the experimental artefact used in the paper ``Program Representations for Predictive Compilation: State of Affairs in the Early 20’s''
+This repository contains the experimental artefact used in the paper "Program Representations for Predictive Compilation: State of Affairs in the Early 20’s"
 
 ## Contents
 
