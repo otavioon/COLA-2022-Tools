@@ -30,7 +30,8 @@ RUN wget https://github.com/sharkdp/hyperfine/releases/download/v1.11.0/hyperfin
 RUN pip3 install tensorflow tensorboard protobuf numpy pygraphviz appdirs \
     pandas tqdm absl-py colorit pygmo scikit-learn scipy matplotlib seaborn \
     networkx gensim==3.4.0 six==1.15.0 wget python-Levenshtein nltk angr \
-    spektral pyyaml stellargraph scikit-image jupyter jupyterlab ipython
+    spektral pyyaml stellargraph scikit-image jupyter jupyterlab ipython \
+    cython
 
 # YaCos IR2VEC Dependencies
 RUN git clone https://github.com/IITH-Compilers/IR2Vec.git \
@@ -45,4 +46,10 @@ RUN git clone https://github.com/IITH-Compilers/IR2Vec.git \
 
 RUN git clone https://github.com/ComputerSystemsLaboratory/YaCoS.git \
     && cd YaCoS \
+    && cd cython_rbp \
+    && python3 setup.py install \
+    && rm -rf cythonrbp.egg-info \
+    && rm -rf build \
+    && rm -rf dist \
+    && cd .. \
     && pip3 install .
