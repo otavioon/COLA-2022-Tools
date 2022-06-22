@@ -29,8 +29,6 @@ import argparse
 from pathlib import Path
 from typing import List
 
-from absl import app, flags, logging
-
 from yacos.info import compy as R
 from yacos.info.compy.extractors import LLVMDriver
 

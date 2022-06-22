@@ -24,71 +24,77 @@ import os
 import sys
 import glob
 import numpy as np
-
-from absl import app, flags, logging
+from tqdm.contrib.concurrent import thread_map
+import argparse
+from pathlib import Path
+from typing import List
 
 from yacos.info import compy as R
 from yacos.info.compy.extractors import LLVMDriver
 
+# TODO fnid ir2vec data and put in the .local directory
 
-def extract(argv):
-    """Extract a graph representation."""
+def do_extract_and_save(args):
+    source_file = args[0]
+    output_file = args[1]
+    builder = args[2]
 
-    FLAGS = flags.FLAGS
+    try:
+        extractionInfo = builder.ir_to_info(str(source_file))
+        np.savez_compressed(output_file, values=extractionInfo.moduleInfo.ir2vec)
+    except Exception as e:
+        print(f"Error extracting IR2Vec from: '{source_file}'. {e.__class__.__name__}: {e}")
+
+
+def main(root_dataset_dir: Path, root_output_dir: Path, ir_dir: str, workers: int = None):
+    root_dataset_dir = root_dataset_dir / ir_dir
+
+    if not root_dataset_dir.is_dir():
+        raise FileNotFoundError(dataset_dir)
 
     # Instantiate the LLVM driver.
     driver = LLVMDriver([])
     # Instantiate the builder.
     builder = R.LLVMIR2VecBuilder(driver)
 
-    # Verify datset directory.
-    if not os.path.isdir(FLAGS.dataset_directory):
-        logging.error('Dataset directory {} does not exist.'.format(
-            FLAGS.dataset_directory)
-        )
-        sys.exit(1)
+    folders = [p for p in root_dataset_dir.glob("*") if p.is_dir()]
 
-    folders = [
-                os.path.join(FLAGS.dataset_directory, subdir)
-                for subdir in os.listdir(FLAGS.dataset_directory)
-                if os.path.isdir(os.path.join(FLAGS.dataset_directory, subdir))
-              ]
-
-    idx = FLAGS.dataset_directory.rfind('/')
-    last_folder = FLAGS.dataset_directory[idx+1:]
-    
-    # Extract ir2vec
-    ir2vec = {}
-    max_length = []
-
-    # Load data from all folders
     for folder in folders:
-        # Create the output directory.
-        outdir = os.path.join(folder.replace(last_folder,
-                              '{}_ir2vec'.format(last_folder)))
-        os.makedirs(outdir, exist_ok=True)
+        output_dir = root_output_dir / f"ir2vec_{ir_dir}" / folder.stem
+        output_dir.mkdir(parents=True, exist_ok=True)
 
-        # Extract "ir2vec" from the file
-        sources = glob.glob('{}/*.ll'.format(folder))
+        args = [
+            (source, output_dir/f"{source.stem}", builder)
+            for source in folder.glob("*.ll")
+        ]
 
-        for source in sources:
-            try:
-                extractionInfo = builder.ir_to_info(source)
-            except Exception:
-                logging.error('Error {}.'.format(source))
-                continue
-
-            filename = source.replace(folder, outdir)
-            filename = filename[:-3]
-            np.savez_compressed(filename,
-                                values=extractionInfo.moduleInfo.ir2vec)
+        # Run thread map
+        output_files = thread_map(
+            do_extract_and_save, args, max_workers=workers,
+            desc=f"Extracting IR2Vec from LLVM IR to: '{output_dir}'"
+        )
 
 # Execute
 if __name__ == '__main__':
-    # app
-    flags.DEFINE_string('dataset_directory',
-                        None,
-                        'Dataset directory')
-    flags.mark_flag_as_required('dataset_directory')
+    parser = argparse.ArgumentParser(
+        description='Extract Inst2Vec IR from a LLVM IR dataset',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument("root_dataset_dir", action="store", type=str,
+                        help="Directory to search CPP files")
+    parser.add_argument("output_dir", action="store", type=str,
+                        help="Directory where representation files will be outputed")
+    parser.add_argument("--ir-dir", type=str, required=True,
+                        help="IR directory")
+    parser.add_argument("--workers", type=int, default=None,
+                        help="Number of concurrent processes to extract IR")
+    args = parser.parse_args()
+    print(args)
 
-    app.run(extract)
+    root_dataset_dir = Path(args.root_dataset_dir)
+    output_dir = Path(args.output_dir)
+
+    ret_code = main(
+        root_dataset_dir=root_dataset_dir, root_output_dir=output_dir,
+        ir_dir=args.ir_dir, workers=args.workers
+    )
+    sys.exit(ret_code)
