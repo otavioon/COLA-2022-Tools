@@ -19,9 +19,9 @@ fi
 for DATASET in ${DATASETS[@]}
 do
     mkdir $OUTPUT_DIR/$DATASET
-    mkdir $OUTPUT_DIR/$DATASET/LBP_Hist_multiple_size 
+    mkdir $OUTPUT_DIR/$DATASET/lbpif
     echo "LBP Histogram multiple size"
-    python3 $ALG_DIR/create_lbp_histogram_npz.py -z $OUTPUT_DIR/$DATASET/LBP_Hist_multiple_size -p $BASE_DIR/$DATASET -c 256 -e ll -n -1.0
+    python3 $ALG_DIR/create_lbp_histogram_npz.py -z $OUTPUT_DIR/$DATASET/lbpif -p $BASE_DIR/$DATASET/IR_O0 -c 256 -e ll -n -1.0
 done
 
 DATASETS=('anghabench')
@@ -39,9 +39,9 @@ fi
 for DATASET in ${DATASETS[@]}
 do
     mkdir $OUTPUT_DIR/$DATASET
-    mkdir $OUTPUT_DIR/$DATASET/LBP_Hist_multiple_size 
+    mkdir $OUTPUT_DIR/$DATASET/lbpif 
     echo "LBP Histogram multiple size"
-    python3 $ALG_DIR/create_lbp_histogram_npz.py -z $OUTPUT_DIR/$DATASET/LBP_Hist_multiple_size -p $BASE_DIR/$DATASET -c 256 -e ll -n -1.0
+    python3 $ALG_DIR/create_lbp_histogram_npz.py -z $OUTPUT_DIR/$DATASET/lbpif -p $BASE_DIR/$DATASET/IR_O0 -c 256 -e ll -n -1.0
 done
 
 DATASETS=('poj' 'codenet' 'anghabench')
@@ -59,7 +59,7 @@ fi
 for DATASET in ${DATASETS[@]}
 do
     mkdir $OUTPUT_DIR/$DATASET
-    mkdir $OUTPUT_DIR/$DATASET/LBP_Hist_multiple_size 
+    mkdir $OUTPUT_DIR/$DATASET/lbpif 
     echo "LBP Histogram multiple size"
-    python3 $ALG_DIR/create_lbp_histogram_npz.py -z $OUTPUT_DIR/$DATASET/LBP_Hist_multiple_size -p $BASE_DIR/$DATASET -c 256 -e ll -n -1.0
+    python3 $ALG_DIR/create_lbp_histogram_npz.py -z $OUTPUT_DIR/$DATASET/lbpif -p $BASE_DIR/$DATASET/IR_O0 -c 256 -e ll -n -1.0
 done

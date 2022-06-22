@@ -1,4 +1,5 @@
-import argparse, os, yaml, glob
+import argparse, os, yaml, glob, sys 
+from tqdm import tqdm
 from yacos.info.image import *
 
 def save_rbp_histogram_npz(binary_file,npz_file,columns,lines):
@@ -61,9 +62,9 @@ if max_size != None:
 	files = new_files
 
 tuplas = []
-for f in files:
+for f in tqdm(files):
 	binary_file = f+'.'+process_ext
-	print(binary_file)
+	#print(binary_file)
 	if os.path.exists(binary_file):
 		directory, name = os.path.split(f)
 		root_dir, collection_dir = os.path.split(directory)

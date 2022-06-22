@@ -1,4 +1,5 @@
 import argparse, os, yaml, glob, math, sys
+from tqdm import tqdm
 import numpy as np
 from PIL import Image
 from yacos.info.image import bit2vec
@@ -108,14 +109,14 @@ if lines == -1:
 	greater=max(sizes)[0]
 	lines=math.ceil((greater*8)/columns)
 
-print(files)
-print(lines)
+#print(files)
+#print(lines)
 
 tuplas = []
-for f in files:
+for f in tqdm(files):
 	binary_file = f+'.'+process_ext
 	if os.path.exists(binary_file):
-		print(binary_file)
+		#print(binary_file)
 		directory, name = os.path.split(f)
 		root_dir, collection_dir = os.path.split(directory)
 		img_dir = os.path.join(image_directory,collection_dir)

@@ -19,10 +19,10 @@ fi
 for DATASET in ${DATASETS[@]}
 do
     mkdir $OUTPUT_DIR/$DATASET
-    mkdir $OUTPUT_DIR/$DATASET/PROG2IMAGE_IMG_one_size 
-    mkdir $OUTPUT_DIR/$DATASET/PROG2IMAGE_NPZ_one_size
+    mkdir $OUTPUT_DIR/$DATASET/PROG2IMAGE_IMG 
+    mkdir $OUTPUT_DIR/$DATASET/prog2image
     echo "IMG and NPZ one size"
-    python3 $ALG_DIR/create_image_and_npz.py -z=$OUTPUT_DIR/$DATASET/PROG2IMAGE_NPZ_one_size -i=$OUTPUT_DIR/$DATASET/PROG2IMAGE_IMG_one_size -p=$BASE_DIR/$DATASET -c=256 -l=-1 -e=ll -n=-1.0
+    python3 $ALG_DIR/create_image_and_npz.py -z=$OUTPUT_DIR/$DATASET/prog2image -i=$OUTPUT_DIR/$DATASET/PROG2IMAGE_IMG -p=$BASE_DIR/$DATASET/IR_O0 -c=256 -l=-1 -e=ll -n=-1.0
 done
 
 DATASETS=('anghabench')
@@ -40,10 +40,10 @@ fi
 for DATASET in ${DATASETS[@]}
 do
     mkdir $OUTPUT_DIR/$DATASET
-    mkdir $OUTPUT_DIR/$DATASET/PROG2IMAGE_IMG_one_size 
-    mkdir $OUTPUT_DIR/$DATASET/PROG2IMAGE_NPZ_one_size
+    mkdir $OUTPUT_DIR/$DATASET/PROG2IMAGE_IMG 
+    mkdir $OUTPUT_DIR/$DATASET/prog2image
     echo "IMG and NPZ one size"
-    python3 $ALG_DIR/create_image_and_npz.py -z=$OUTPUT_DIR/$DATASET/PROG2IMAGE_NPZ_one_size -i=$OUTPUT_DIR/$DATASET/PROG2IMAGE_IMG_one_size -p=$BASE_DIR/$DATASET -c=256 -l=-1 -e=ll -n=-1.0
+    python3 $ALG_DIR/create_image_and_npz.py -z=$OUTPUT_DIR/$DATASET/prog2image -i=$OUTPUT_DIR/$DATASET/PROG2IMAGE_IMG -p=$BASE_DIR/$DATASET/IR_O0 -c=256 -l=-1 -e=ll -n=-1.0
 done
 
 DATASETS=('poj' 'codenet' 'anghabench')
@@ -61,8 +61,8 @@ fi
 for DATASET in ${DATASETS[@]}
 do
     mkdir $OUTPUT_DIR/$DATASET
-    mkdir $OUTPUT_DIR/$DATASET/PROG2IMAGE_IMG_one_size 
-    mkdir $OUTPUT_DIR/$DATASET/PROG2IMAGE_NPZ_one_size
+    mkdir $OUTPUT_DIR/$DATASET/PROG2IMAGE_IMG 
+    mkdir $OUTPUT_DIR/$DATASET/prog2image
     echo "IMG and NPZ one size"
-    python3 $ALG_DIR/create_image_and_npz.py -z=$OUTPUT_DIR/$DATASET/PROG2IMAGE_NPZ_one_size -i=$OUTPUT_DIR/$DATASET/PROG2IMAGE_IMG_one_size -p=$BASE_DIR/$DATASET -c=256 -l=-1 -e=ll -n=-1.0
+    python3 $ALG_DIR/create_image_and_npz.py -z=$OUTPUT_DIR/$DATASET/prog2image -i=$OUTPUT_DIR/$DATASET/PROG2IMAGE_IMG -p=$BASE_DIR/$DATASET/IR_O0 -c=256 -l=-1 -e=ll -n=-1.0
 done
