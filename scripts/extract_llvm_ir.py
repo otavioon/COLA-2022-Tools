@@ -16,125 +16,93 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-#
-# Compile a program and extract the number of LLVM instructions.
-#
-
 import os
 import sys
 import glob
 import subprocess
-
-from absl import app, flags, logging
+from tqdm.contrib.concurrent import thread_map
+import argparse
+from pathlib import Path
+from typing import List
 
 from yacos.essential import IO
 from yacos.essential import Sequence
 from yacos.info import compy as R
 from yacos.info.compy.extractors import LLVMDriver
 
-flags.DEFINE_enum('level',
-                  'O0',
-                  [
-                      'O0',
-                      'O1',
-                      'O2',
-                      'O3',
-                      'Os',
-                      'Oz'
-                  ],
-                  'Compiler optimization level')
 
-def emit_llvm(filename, outdir, message=''):
+def emit_llvm(filename: Path, output_file: Path):
     """Generate bitcode."""
-    idx = filename.rfind('/')
-    new_filename = filename[idx+1:]
-    if filename.endswith('.c'):
+    if str(filename).endswith('.c'):
         compiler = 'clang'
-        new_filename = '{}/{}.ll'.format(outdir, new_filename[:-2])
-    elif filename.endswith('.cpp'):
+    elif str(filename).endswith('.cpp'):
         compiler = 'clang++'
-        new_filename = '{}/{}.ll'.format(outdir, new_filename[:-4])
     else:
         return None
 
-    cmdline = '{} -S -c -Xclang -disable-O0-optnone -w -emit-llvm {} -o {}'.format(compiler,
-                                                                                   filename,
-                                                                                   new_filename)
+    cmdline = f'{compiler} -S -c -Xclang -disable-O0-optnone -w -emit-llvm {filename} -o {output_file}'
+    subprocess.run(cmdline, shell=True, check=True, capture_output=False)
 
-    try:
-        subprocess.run(cmdline,
-                       shell=True,
-                       check=True,
-                       capture_output=False)
-    except subprocess.CalledProcessError:
-        if message:
-            logging.error(message)
-        return None # sys.exit(1)
-
-    return new_filename
-
-
-def optimize(filename, sequence, message=''):
+def optimize(filename, sequence):
     """Optimize."""
-    cmdline = 'opt {0} {1} -o {1}'.format(Sequence.name_pass_to_string(sequence),
-                                          filename)
+    cmdline = f'opt {filename} -S {Sequence.name_pass_to_string(sequence)} -o {filename}'
+    subprocess.run(cmdline, shell=True, check=True, capture_output=False)
 
+
+def do_extract_and_optimize(args):
+    source_file = args[0]
+    output_file = args[1]
+    level_str = args[2]
     try:
-        subprocess.run(cmdline,
-                       shell=True,
-                       check=True,
-                       capture_output=False)
-    except subprocess.CalledProcessError:
-        if message:
-            logging.error(message)
-        return None # sys.exit(1)
+        emit_llvm(source_file, output_file)
+        optimize(output_file, [level_str])
+    except Exception as e:
+        print(f"Error extracting LLVM IR from: '{source_file}'. {e.__class__.__name__}: {e}")
 
-def extract(argv):
-    """Execute."""
-    del argv
+def main(dataset_dir: Path, root_output_dir: Path, level: str, workers: int = None):
+    if not dataset_dir.is_dir():
+        raise FileNotFoundError(dataset_dir)
 
-    FLAGS = flags.FLAGS
-
-    # Verify datset directory.
-    if not os.path.isdir(FLAGS.dataset_directory):
-        logging.error('Dataset directory {} does not exist.'.format(
-            FLAGS.dataset_directory)
-        )
-        sys.exit(1)
-
-    folders = [
-                os.path.join(FLAGS.dataset_directory, subdir)
-                for subdir in os.listdir(FLAGS.dataset_directory)
-                if os.path.isdir(os.path.join(FLAGS.dataset_directory, subdir))
-              ]
-
-    idx = FLAGS.dataset_directory.rfind('/')
-    last_folder = FLAGS.dataset_directory[idx+1:]
+    folders = [p for p in dataset_dir.glob("*") if p.is_dir()]
 
     # Generate LLVM IR
     for folder in folders:
+        output_dir = root_output_dir / f"IR_{level}" / folder.stem
+        output_dir.mkdir(parents=True, exist_ok=True)
+        # create a map
+        args = [
+            (source, output_dir / f"{source.stem}.ll" , f"-{level}")
+            for source in folder.glob('*')
+        ]
+        # Run thread map
+        output_files = thread_map(
+            do_extract_and_optimize, args, max_workers=workers,
+            desc=f"Extracting LLVM IR from: '{folder}' to '{output_dir}'"
+        )
 
-        # Create the output directory.
-        outdir = os.path.join(folder.replace(last_folder,
-                                             '{}_IR_{}'.format(last_folder, FLAGS.level)))
-        os.makedirs(outdir, exist_ok=True)
+    return 0
 
-        sources = glob.glob('{}/*'.format(folder))
-        folder_name = folder.replace('{}/'.format(FLAGS.dataset_directory), '')
-
-        for source in sources:
-            print(f"Emitting LLVM for {source}... ", end="")
-            filename = emit_llvm(source, outdir)
-            optimize(filename, ['-{}'.format(FLAGS.level)])
-            print(f"optimized with {FLAGS.level} and saved to {filename}")
-
-# Execute
 if __name__ == '__main__':
-    # app
-    flags.DEFINE_string('dataset_directory',
-                        None,
-                        'Dataset directory')
+    parser = argparse.ArgumentParser(
+        description='Extract LLVM IR from a dataset',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument("dataset_dir", action="store", type=str,
+                        help="Directory to search CPP files")
+    parser.add_argument("output_dir", action="store", type=str,
+                        help="Directory where .ll files will be outputed")
+    parser.add_argument("--level", type=str, default='O0',
+                        choices=['O0', 'O1', 'O2', 'O3', 'Os', 'Oz'],
+                        help="Compiler optimization level")
+    parser.add_argument("--workers", type=int, default=None,
+                        help="Number of concurrent processes to extract IR")
+    args = parser.parse_args()
+    print(args)
 
-    flags.mark_flag_as_required('dataset_directory')
+    dataset_dir = Path(args.dataset_dir)
+    output_dir =  Path(args.output_dir)
 
-    app.run(extract)
+    ret_code = main(
+        dataset_dir=dataset_dir, root_output_dir=output_dir,
+        level=args.level, workers=args.workers
+    )
+    sys.exit(ret_code)

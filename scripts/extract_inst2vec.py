@@ -24,40 +24,37 @@ import os
 import sys
 import numpy as np
 
-from absl import app, flags, logging
+from pathlib import Path
+from tqdm.contrib.concurrent import thread_map
+from collections import defaultdict
+import argparse
+import tqdm
 
 from yacos.info.ncc import Inst2Vec
 
-    
-def extract(argv):
-    """Extract a graph representation."""
+def do_save_embeddings(args):
+    try:
+        filename = args[0]
+        padding = args[1]
+        np.savez_compressed(filename, values=padding)
+    except Exception as e:
+        print(f"Error saving embeddings from: '{filename}'. {e.__class__.__name__}: {e}")
 
-    FLAGS = flags.FLAGS
 
-    # Verify datset directory.
-    if not os.path.isdir(FLAGS.dataset_directory):
-        logging.error('Dataset directory {} does not exist.'.format(
-            FLAGS.dataset_directory)
-        )
-        sys.exit(1)
+def main(root_dataset_dir: Path, root_output_dir: Path, ir_dir: str, workers: int = None):
+    root_dataset_dir = root_dataset_dir / ir_dir
 
-    folders = [
-                os.path.join(FLAGS.dataset_directory, subdir)
-                for subdir in os.listdir(FLAGS.dataset_directory)
-                if os.path.isdir(os.path.join(FLAGS.dataset_directory, subdir))
-              ]
+    if not root_dataset_dir.is_dir():
+        raise FileNotFoundError(dataset_dir)
 
-    idx = FLAGS.dataset_directory.rfind('/')
-    last_folder = FLAGS.dataset_directory[idx+1:]
-    
+    folders = [p for p in root_dataset_dir.glob("*") if p.is_dir()]
+
     # Extract int2vec
-    inst2vec = {}
+    inst2vec = defaultdict(dict)
     max_length = []
 
-    for folder in folders:
-        inst2vec[folder] = {}
-        # Extract "inst2vec" from the file
-        Inst2Vec.prepare_benchmark(folder)
+    for folder in tqdm.tqdm(folders, desc="Extracting Inst2Vec"):
+        Inst2Vec.prepare_benchmark(str(folder))
         rep = Inst2Vec.extract(data_type="index")
         for bench, indexes in rep.items():
             inst2vec[folder][bench] = indexes
@@ -69,29 +66,47 @@ def extract(argv):
     unk_idx, _ = Inst2Vec.unknown
     embeddings = Inst2Vec.embeddings
 
+    args = []
+
     for folder, data in inst2vec.items():
         # Create the output directory.
-        outdir = os.path.join(folder.replace(last_folder,
-                              '{}_inst2vec'.format(last_folder)))
-        os.makedirs(outdir, exist_ok=True)
+        output_dir = root_output_dir / f"inst2vec_{ir_dir}" / folder.stem
+        output_dir.mkdir(parents=True, exist_ok=True)
 
         for bench, indexes in data.items():
             padding = [list(embeddings[idx]) for idx in indexes]
             for i in range(len(indexes), max_length):
                 padding += list(embeddings[unk_idx])
 
-            filename = os.path.join(outdir, bench)
-            np.savez_compressed(filename, values=padding)
+            filename = output_dir / bench
+            args.append((filename, padding))
 
-    del embeddings
-
+    thread_map(
+        do_save_embeddings, args, max_workers=workers,
+        desc=f"Saving compressed files..."
+    )
 
 # Execute
 if __name__ == '__main__':
-    # app
-    flags.DEFINE_string('dataset_directory',
-                        None,
-                        'Dataset directory')
-    flags.mark_flag_as_required('dataset_directory')
+    parser = argparse.ArgumentParser(
+        description='Extract Inst2Vec IR from a LLVM IR dataset',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument("root_dataset_dir", action="store", type=str,
+                        help="Directory to search CPP files")
+    parser.add_argument("output_dir", action="store", type=str,
+                        help="Directory where representation files will be outputed")
+    parser.add_argument("--ir-dir", type=str, required=True,
+                        help="IR directory")
+    parser.add_argument("--workers", type=int, default=None,
+                        help="Number of concurrent processes to extract IR")
+    args = parser.parse_args()
+    print(args)
 
-    app.run(extract)
+    root_dataset_dir = Path(args.root_dataset_dir)
+    output_dir = Path(args.output_dir)
+
+    ret_code = main(
+        root_dataset_dir=root_dataset_dir, root_output_dir=output_dir,
+        ir_dir=args.ir_dir, workers=args.workers
+    )
+    sys.exit(ret_code)

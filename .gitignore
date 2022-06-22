@@ -1,0 +1,5 @@
+YaCos/
+datasets/obj/*
+.local/*
+.bash_history
+.python_history
