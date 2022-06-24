@@ -46,9 +46,9 @@ RUN git clone https://github.com/IITH-Compilers/IR2Vec.git \
 
 RUN git clone https://github.com/ComputerSystemsLaboratory/YaCoS.git \
     && cd YaCoS \
-    && cd cython_rbp \
+    && cd cython_lbpeq \
     && python3 setup.py install \
-    && rm -rf cythonrbp.egg-info \
+    && rm -rf cythonlbpeq.egg-info \
     && rm -rf build \
     && rm -rf dist \
     && cd .. \
