@@ -433,7 +433,7 @@ def execute(argv):
                 loss=categorical_crossentropy,
                 metrics=['accuracy'])
 
-  if FLAGS_print_model:
+  if FLAGS.print_model:
     print()
     model.summary()
 

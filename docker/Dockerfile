@@ -27,11 +27,11 @@ RUN update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-10 1
 RUN wget https://github.com/sharkdp/hyperfine/releases/download/v1.11.0/hyperfine_1.11.0_amd64.deb \
     && dpkg -i hyperfine_1.11.0_amd64.deb && rm -f hyperfine_1.11.0_amd64.deb
 
-RUN pip3 install tensorflow tensorboard protobuf numpy pygraphviz appdirs \
+RUN pip3 install tensorflow tensorboard wandb numpy pygraphviz appdirs \
     pandas tqdm absl-py colorit pygmo scikit-learn scipy matplotlib seaborn \
     networkx gensim==3.4.0 six==1.15.0 wget python-Levenshtein nltk angr \
     spektral pyyaml stellargraph scikit-image jupyter jupyterlab ipython \
-    cython
+    cython chardet
 
 # YaCos IR2VEC Dependencies
 RUN git clone https://github.com/IITH-Compilers/IR2Vec.git \
