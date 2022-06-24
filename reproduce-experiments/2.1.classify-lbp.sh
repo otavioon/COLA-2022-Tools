@@ -17,6 +17,7 @@ for DATASET in ${DATASETS[@]}
 do
     for REPRESENTATION in ${REPRESENTATIONS[@]}
     do
+        mkdir ${RESULT_DIR}/${DATASET}
         mkdir ${RESULT_DIR}/${DATASET}/${REPRESENTATION}
         python3 $ALG_DIR/classify.py --dataset_directory=${REPRESENTATION_DIR}/${DATASET}/${REPRESENTATION} \
                 --dataset_description=${DATASET_DIR}/${DATASET}/dataset_description.yaml \
