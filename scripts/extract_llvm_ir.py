@@ -41,7 +41,15 @@ def emit_llvm(filename: Path, output_file: Path):
         return None
 
     cmdline = f'{compiler} -S -c -Xclang -disable-O0-optnone -w -emit-llvm {filename} -o {output_file}'
-    subprocess.run(cmdline, shell=True, check=True, capture_output=False)
+
+    # Try to compile.
+    result = subprocess.run(cmdline, shell=True, check=False, capture_output=False)
+    if result.returncode != 0:
+        # This command line replaces calls to gets() by calls to fgets() to work around compilation errors 
+        # due to the deprecation of the gets function. 
+        print(f'Error when compiling {filename}. Trying again with -D"gets(x)=fgets(x,sizeof(x),stdin)"') 
+        cmdline = f'{compiler} -S -D"gets(x)=fgets(x,sizeof(x),stdin)" -c -Xclang -disable-O0-optnone -w -emit-llvm {filename} -o {output_file}'
+        subprocess.run(cmdline, shell=True, check=True, capture_output=False)
 
 def optimize(filename, sequence):
     """Optimize."""
