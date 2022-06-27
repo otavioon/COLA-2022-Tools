@@ -21,7 +21,7 @@ do
     mkdir $OUTPUT_DIR/$DATASET
     mkdir $OUTPUT_DIR/$DATASET/lbpeq
     echo "RBP Histogram multiple size"
-    python3 $ALG_DIR/create_rbp_histogram_npz.py -z $OUTPUT_DIR/$DATASET/lbpeq -p $BASE_DIR/$DATASET/IR_O0 -c 256 -e ll -n 0
+    python3 $ALG_DIR/create_lbpeq_histogram_npz.py -z $OUTPUT_DIR/$DATASET/lbpeq -p $BASE_DIR/$DATASET/IR_O0 -c 256 -e ll -n 0
 done
 
 DATASETS=('anghabench')
@@ -41,7 +41,7 @@ do
     mkdir $OUTPUT_DIR/$DATASET
     mkdir $OUTPUT_DIR/$DATASET/lbpeq
     echo "RBP Histogram multiple size"
-    python3 $ALG_DIR/create_rbp_histogram_npz.py -z $OUTPUT_DIR/$DATASET/lbpeq -p $BASE_DIR/$DATASET/IR_O0 -c 256 -e ll -n 0
+    python3 $ALG_DIR/create_lbpeq_histogram_npz.py -z $OUTPUT_DIR/$DATASET/lbpeq -p $BASE_DIR/$DATASET/IR_O0 -c 256 -e ll -n 0
 done
 
 DATASETS=('poj' 'codenet' 'anghabench')
@@ -61,5 +61,5 @@ do
     mkdir $OUTPUT_DIR/$DATASET
     mkdir $OUTPUT_DIR/$DATASET/lbpeq
     echo "RBP Histogram multiple size"
-    python3 $ALG_DIR/create_rbp_histogram_npz.py -z $OUTPUT_DIR/$DATASET/lbpeq -p $BASE_DIR/$DATASET/IR_O0 -c 256 -e ll -n 0
+    python3 $ALG_DIR/create_lbpeq_histogram_npz.py -z $OUTPUT_DIR/$DATASET/lbpeq -p $BASE_DIR/$DATASET/IR_O0 -c 256 -e ll -n 0
 done
