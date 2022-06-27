@@ -20,7 +20,7 @@ for DATASET in ${DATASETS[@]}
 do
     mkdir $OUTPUT_DIR/$DATASET
     mkdir $OUTPUT_DIR/$DATASET/lbpeq
-    echo "RBP Histogram multiple size"
+    echo "LBPeq Histogram multiple size"
     python3 $ALG_DIR/create_lbpeq_histogram_npz.py -z $OUTPUT_DIR/$DATASET/lbpeq -p $BASE_DIR/$DATASET/IR_O0 -c 256 -e ll -n 0
 done
 
@@ -40,7 +40,7 @@ for DATASET in ${DATASETS[@]}
 do
     mkdir $OUTPUT_DIR/$DATASET
     mkdir $OUTPUT_DIR/$DATASET/lbpeq
-    echo "RBP Histogram multiple size"
+    echo "LBPeq Histogram multiple size"
     python3 $ALG_DIR/create_lbpeq_histogram_npz.py -z $OUTPUT_DIR/$DATASET/lbpeq -p $BASE_DIR/$DATASET/IR_O0 -c 256 -e ll -n 0
 done
 
@@ -60,6 +60,6 @@ for DATASET in ${DATASETS[@]}
 do
     mkdir $OUTPUT_DIR/$DATASET
     mkdir $OUTPUT_DIR/$DATASET/lbpeq
-    echo "RBP Histogram multiple size"
+    echo "LBPeq Histogram multiple size"
     python3 $ALG_DIR/create_lbpeq_histogram_npz.py -z $OUTPUT_DIR/$DATASET/lbpeq -p $BASE_DIR/$DATASET/IR_O0 -c 256 -e ll -n 0
 done
