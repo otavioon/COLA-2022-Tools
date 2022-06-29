@@ -620,7 +620,7 @@ if __name__ == '__main__':
                          200,
                         'Number of epochs')
     flags.DEFINE_integer('rounds',
-                         3,
+                         10,
                          'Rounts')
     flags.DEFINE_boolean('verbose',
                          True,
