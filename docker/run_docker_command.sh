@@ -6,7 +6,6 @@
 source ./vars.sh
 
 $CONTAINER_CMD run --interactive --tty --rm \
-  --user $(id -u):$(id -g) \
   --env "HOME=$VOLUME_DIR" \
   --env "SHELL=/bin/bash" \
   --workdir $VOLUME_DIR \
