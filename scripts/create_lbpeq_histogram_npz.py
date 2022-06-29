@@ -1,6 +1,7 @@
-import argparse, os, yaml, glob, sys 
+import argparse, os, yaml, glob, sys
 from tqdm import tqdm
 from yacos.info.image import *
+from tqdm.contrib.concurrent import thread_map
 
 def save_rbp_histogram_npz(binary_file,npz_file,columns,lines):
 	array = bit2vec.get_array(binary_file)
@@ -18,11 +19,12 @@ parser.add_argument('-y','--yaml', dest='yaml_file', default=None, help='Yaml fi
 parser.add_argument('-s','--max-size', dest='max_size', default=None, help='Maximun binary size (in bytes) to create files')
 parser.add_argument('-e', '--ext', dest='process_ext', default='ll', help='extension of files to be precessed')
 parser.add_argument('-n', '--npz-fill', dest='npz_fill', default=0.0, help='value to fill matrix')
+parser.add_argument("--workers", type=int, default=None, help="Number of concurrent processes")
 args = parser.parse_args()
 
 npz_directory = args.npz_directory
 process_directory = args.process_directory
-columns = args.columns 
+columns = args.columns
 lines = args.lines
 yaml_file = args.yaml_file
 max_size = args.max_size
@@ -61,11 +63,10 @@ if max_size != None:
 			new_files.append(f)
 	files = new_files
 
-tuplas = []
-for f in tqdm(files):
-	binary_file = f+'.'+process_ext
-	#print(binary_file)
-	if os.path.exists(binary_file):
+def process(f: str):
+	try:
+		binary_file = f+'.'+process_ext
+		#print(binary_file)
 		directory, name = os.path.split(f)
 		root_dir, collection_dir = os.path.split(directory)
 
@@ -77,7 +78,28 @@ for f in tqdm(files):
 			os.system('mkdir {0}'.format(npz_dir))
 
 		npz_rbp_histogram = save_rbp_histogram_npz(binary_file,npz_file,columns,lines)
-	else:
-		print('====================================')
-		print('>>> file {0} not found <<<'.format(binary_file))
-		print('====================================')
+	except Exception as e:
+		print(f"Error: {e.__class__.__name__}: {e}")
+
+tuplas = []
+thread_map(process, files, desc="Extracting lbpeq histograms...", max_workers=args.workers)
+
+# for f in tqdm(files):
+# 	binary_file = f+'.'+process_ext
+# 	#print(binary_file)
+# 	if os.path.exists(binary_file):
+# 		directory, name = os.path.split(f)
+# 		root_dir, collection_dir = os.path.split(directory)
+#
+# 		npz_dir = os.path.join(npz_directory, collection_dir)
+# 		npz_file = os.path.join(npz_dir, name)
+# 		npz_file = npz_file+'.npz'
+#
+# 		if not os.path.exists(npz_dir):
+# 			os.system('mkdir {0}'.format(npz_dir))
+#
+# 		npz_rbp_histogram = save_rbp_histogram_npz(binary_file,npz_file,columns,lines)
+# 	else:
+# 		print('====================================')
+# 		print('>>> file {0} not found <<<'.format(binary_file))
+# 		print('====================================')

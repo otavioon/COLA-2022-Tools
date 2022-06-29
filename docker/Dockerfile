@@ -31,7 +31,7 @@ RUN pip3 install tensorflow tensorboard wandb numpy pygraphviz appdirs \
     pandas tqdm absl-py colorit pygmo scikit-learn scipy matplotlib seaborn \
     networkx gensim==3.4.0 six==1.15.0 wget python-Levenshtein nltk angr \
     spektral pyyaml stellargraph scikit-image jupyter jupyterlab ipython \
-    cython chardet
+    cython chardet requests
 
 # YaCos IR2VEC Dependencies
 RUN git clone https://github.com/IITH-Compilers/IR2Vec.git \

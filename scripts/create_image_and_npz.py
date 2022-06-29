@@ -1,5 +1,6 @@
 import argparse, os, yaml, glob, math, sys
 from tqdm import tqdm
+from tqdm.contrib.concurrent import thread_map
 import numpy as np
 from PIL import Image
 from yacos.info.image import bit2vec
@@ -8,14 +9,14 @@ from yacos.info.image import bit2vec
 
 def bin2mat(binary_name,output_image,output_file,columns,desired_lines,np_missing_values=-1.0,img_miising_values=128):
 	'''
-		recieves a binary file, converts it in a matrix 
-		where each position is a bit and save it as image 
+		recieves a binary file, converts it in a matrix
+		where each position is a bit and save it as image
 		and npz file
-	
+
 		binary_name: str
 			the binary file name to be converted
 		output_image: str
-			the image file name that will be created 
+			the image file name that will be created
 			(the image will be in shades of grey)
 		output_file: str
 			the npz file that will be created
@@ -53,12 +54,13 @@ parser.add_argument('-s','--max-size', dest='max_size', default=None, help='Maxi
 parser.add_argument('-e', '--ext', dest='process_ext', default='ll', help='extension of files to be precessed')
 parser.add_argument('-n', '--npz-fill', dest='npz_fill', default=-1.0, help='value to fill npz matrix')
 parser.add_argument('-m', '--img-fill', dest='img_fill', default=128, help='value to fill image matrix')
+parser.add_argument("--workers", type=int, default=None, help="Number of concurrent processes")
 args = parser.parse_args()
 
 image_directory = args.image_directory
 npz_directory = args.npz_directory
 process_directory = args.process_directory
-columns = args.columns 
+columns = args.columns
 lines = args.lines
 yaml_file = args.yaml_file
 max_size = args.max_size
@@ -112,10 +114,9 @@ if lines == -1:
 #print(files)
 #print(lines)
 
-tuplas = []
-for f in tqdm(files):
-	binary_file = f+'.'+process_ext
-	if os.path.exists(binary_file):
+def process(f: str):
+	try:
+		binary_file = f+'.'+process_ext
 		#print(binary_file)
 		directory, name = os.path.split(f)
 		root_dir, collection_dir = os.path.split(directory)
@@ -132,8 +133,32 @@ for f in tqdm(files):
 		if not os.path.exists(npz_dir):
 			os.system('mkdir {0}'.format(npz_dir))
 		bin2mat(binary_file,img_file,npz_file,columns,lines,np_missing_values=npz_fill,img_miising_values=img_fill)
-		
-	else:
-		print('====================================')
-		print('>>> file {0} not found <<<'.format(binary_file))
-		print('====================================')
+	except Exception as e:
+		print(f"Error: {e.__class__.__name__}: {e}")
+
+tuplas = []
+thread_map(process, files, desc="Extracting images...", max_workers=args.workers)
+# for f in tqdm(files):
+# 	binary_file = f+'.'+process_ext
+# 	if os.path.exists(binary_file):
+# 		#print(binary_file)
+# 		directory, name = os.path.split(f)
+# 		root_dir, collection_dir = os.path.split(directory)
+# 		img_dir = os.path.join(image_directory,collection_dir)
+# 		img_file = os.path.join(img_dir,name)
+# 		img_file = img_file+'.png'
+#
+# 		npz_dir = os.path.join(npz_directory, collection_dir)
+# 		npz_file = os.path.join(npz_dir, name)
+# 		npz_file = npz_file+'.npz'
+#
+# 		if not os.path.exists(img_dir):
+# 			os.system('mkdir {0}'.format(img_dir))
+# 		if not os.path.exists(npz_dir):
+# 			os.system('mkdir {0}'.format(npz_dir))
+# 		bin2mat(binary_file,img_file,npz_file,columns,lines,np_missing_values=npz_fill,img_miising_values=img_fill)
+#
+# 	else:
+# 		print('====================================')
+# 		print('>>> file {0} not found <<<'.format(binary_file))
+# 		print('====================================')

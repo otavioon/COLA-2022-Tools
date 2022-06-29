@@ -1,5 +1,5 @@
 SCRIPT_FILE="$(realpath ../scripts/classify_2.py)"
-REPRESENTATION_DIR=../datasets/obj
+REPRESENTATION_DIR=../datasets/representations
 DATASET_DIR=../datasets/src
 RESULT_DIR=../results
 DATASETS=('algo/poj' 'algo/codenet' 'loop/anghabench' 'optz/anghabench' 'optz/poj' 'optz/codenet')
