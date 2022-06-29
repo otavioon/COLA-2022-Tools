@@ -148,10 +148,10 @@ def create_model_dgcnn(labels, graphs):
     activations=["tanh", "tanh", "tanh", "tanh"],
     k=k,
     bias=False,
-    generator=generator,  
+    generator=generator,
   )
   x_inp, x_out = dgcnn_model.in_out_tensors()
-  
+
   # Add the convolutional, max pooling, and dense layers
   x_out = Conv1D(filters=16,
                  kernel_size=sum(layer_sizes),
@@ -169,7 +169,7 @@ def create_model_dgcnn(labels, graphs):
   x_out = Dropout(rate=0.5)(x_out)
   outputs = Dense(units=labels,
                   activation="softmax")(x_out)
-  
+
   #
   # Create the model and prepare it for training by specifying the loss and optimization algorithm
   #
@@ -186,9 +186,9 @@ def load_sequence_dataset(dataset_directory,
 
   idx = dataset_directory.rfind('/')
   dataset_name = dataset_directory[idx + 1:]
-  
+
   X = {'training': [], 'validation': [], 'test': []}
-  Y = {'training': [], 'validation': [], 'test': []} 
+  Y = {'training': [], 'validation': [], 'test': []}
 
   labels = []
 
@@ -205,10 +205,11 @@ def load_sequence_dataset(dataset_directory,
       for sample in samples:
 
         try:
+          # print(f"Loading from {data_directory}/{sample}.npz")
           representation = np.load('{}/{}.npz'.format(data_directory, sample))
         except:
           print('Erro load', data_directory, sample, flush=True)
-          continue
+          raise
 
         representation = representation['values']
 
@@ -220,11 +221,11 @@ def load_sequence_dataset(dataset_directory,
   X_train = np.array(X['training'])
   X_val = np.array(X['validation'])
   X_test = np.array(X['test'])
-    
+
   Y_train = np.array(Y['training'])
   Y_val = np.array(Y['validation'])
   Y_test = np.array(Y['test'])
-  
+
   del X, Y
 
   Y_train = pd.get_dummies(Y_train)
@@ -235,14 +236,14 @@ def load_sequence_dataset(dataset_directory,
 
 def load_graph_dataset(dataset_directory,
                        dataset_description):
-      
+
   fin = open(dataset_description, 'r')
   description_dataset = yl.load(fin, Loader=yl.FullLoader)
   fin.close()
 
   X = []
-  Y = {'training': [], 'validation': [], 'test': []} 
-  Y_index = {'training': [], 'validation': [], 'test': []} 
+  Y = {'training': [], 'validation': [], 'test': []}
+  Y_index = {'training': [], 'validation': [], 'test': []}
 
   labels = []
 
@@ -251,7 +252,7 @@ def load_graph_dataset(dataset_directory,
     for label, samples in phase_data.items():
 
       int_label = int(label)
-      
+
       labels.append(int_label)
 
       data_directory = os.path.join(dataset_directory, label)
@@ -260,23 +261,24 @@ def load_graph_dataset(dataset_directory,
 
         try:
           filename = '{}/{}.pk'.format(data_directory, sample)
+          print(f"Loading from {filename}")
           fin = open(filename, 'rb')
           representation = pk.load(fin)
-          fin.close()                  
+          fin.close()
         except:
           print('Erro load', data_directory, sample, flush=True)
-          continue
+          raise
 
         Y[phase].append(int_label)
         Y_index[phase].append(len(X))
         X.append(representation)
 
   labels = list(dict.fromkeys(labels))
-  
-  Y_train = pd.Series(Y['training'], index=Y_index['training'], name='label', dtype="category")  
-  Y_val = pd.Series(Y['validation'], index=Y_index['validation'], name='label', dtype="category")  
+
+  Y_train = pd.Series(Y['training'], index=Y_index['training'], name='label', dtype="category")
+  Y_val = pd.Series(Y['validation'], index=Y_index['validation'], name='label', dtype="category")
   Y_test = pd.Series(Y['test'], index=Y_index['test'], name='label', dtype="category")
-  
+
   Y_train = pd.get_dummies(Y_train)
   Y_val = pd.get_dummies(Y_val)
   Y_test = pd.get_dummies(Y_test)
@@ -308,7 +310,8 @@ def execute(argv):
   # local flags
   #
   # CNN or GNN?
-  flags_sequence_datasets = ['inst2vec',
+  flags_sequence_datasets = ['histogram_IR_O0',
+                             'inst2vec',
                              'ir2vec',
                              'milepost',
                              'histogram',
@@ -325,7 +328,7 @@ def execute(argv):
   #
   # Initialize the execution
   #
-  
+
   # Measure the initial time
   initial_time = time.time()
 
@@ -338,21 +341,24 @@ def execute(argv):
   if is_graph_dataset(FLAGS.dataset_directory):
     idx = FLAGS.dataset_directory.rfind('/')
     embeddings = FLAGS.dataset_directory[idx + 1:]
-    
+
     graph_name = FLAGS.dataset_directory.replace('/{}'.format(embeddings), '')
     graph_name = graph_name[graph_name.rfind('/') + 1:]
     dataset_name = '{}_{}'.format(graph_name, embeddings)
   else:
     idx = FLAGS.dataset_directory.rfind('/')
     dataset_name = FLAGS.dataset_directory[idx + 1:]
-  
+
+  print(f"Dataset name: {dataset_name}")
+
   if dataset_name in flags_sequence_datasets:
+    print("---------------")
     X_train, Y_train, X_val, Y_val, X_test, Y_test, FLAGS_labels = load_sequence_dataset(FLAGS.dataset_directory,
                                                                                          FLAGS.dataset_description)
   else:
     X, Y_train, Y_val, Y_test, FLAGS_labels = load_graph_dataset(FLAGS.dataset_directory,
                                                                  FLAGS.dataset_description)
-    
+
   end = time.time()
 
   # Store load time
@@ -363,7 +369,7 @@ def execute(argv):
   #
   print('\nPreparing the dataset ...')
   if dataset_name in flags_sequence_datasets:
-    
+
     # 1D Model
     if dataset_name not in flags_2d_sequence_datasets:
       X_train = X_train.reshape(X_train.shape[0], X_train.shape[1], 1)
@@ -375,7 +381,7 @@ def execute(argv):
         X_train = X_train.reshape(X_train.shape[0], X_train.shape[1], X_train.shape[2], 1)
         X_val = X_val.reshape(X_val.shape[0], X_val.shape[1], X_val.shape[2], 1)
         X_test = X_test.reshape(X_test.shape[0], X_test.shape[1], X_test.shape[2], 1)
-        
+
   else:
 
     # Graph
@@ -392,7 +398,7 @@ def execute(argv):
     test_gen = gen.flow(list(Y_test.index),
                         targets=Y_test.values,
                         batch_size=1,
-                        symmetric_normalization=False) 
+                        symmetric_normalization=False)
 
   #
   # Create the model
@@ -400,10 +406,10 @@ def execute(argv):
   if dataset_name in flags_sequence_datasets:
     # Sequence
     model_type = '1d' if dataset_name not in flags_2d_sequence_datasets else '2d'
-    
+
     input_shape = X_train[0].shape
     embedding_dim =  X_train[0].shape[0] if model_type == '1d' else X_train[0].shape[1]
-    
+
     if FLAGS.model == 'lstm':
       model = create_model_lstm(FLAGS_labels,
                                 input_shape,
@@ -415,10 +421,10 @@ def execute(argv):
     else:
       logging.error('Model error.')
       sys.exit(1)
-      
+
   else:
     # Graph
-    
+
     if FLAGS.model == 'gcn':
       model = create_model_gcn(FLAGS_labels,
                                X)
@@ -428,7 +434,7 @@ def execute(argv):
     else:
       logging.error('Model error.')
       sys.exit(1)
-      
+
   model.compile(optimizer=Adam(learning_rate=0.0001),
                 loss=categorical_crossentropy,
                 metrics=['accuracy'])
@@ -441,7 +447,7 @@ def execute(argv):
   # Create the output directory
   #
   os.makedirs(FLAGS.results_directory, exist_ok=True)
-    
+
   #
   # Training
   #
@@ -466,7 +472,7 @@ def execute(argv):
                           verbose=1 if FLAGS.verbose else 0,
                           shuffle=True,
                           callbacks=[es_callback])
-    else:  
+    else:
       history = model.fit(train_gen,
                           validation_data=val_gen,
                           epochs=FLAGS.epochs,
@@ -583,7 +589,7 @@ def execute(argv):
 
     print('\nElapsed time:', flags_times['elapsed'], '(s)')
 
-    
+
 # Execute
 if __name__ == '__main__':
     # app
@@ -592,12 +598,12 @@ if __name__ == '__main__':
                         'Dataset directory')
     flags.DEFINE_string('dataset_description',
                         None,
-                        'Dataset description filename (yaml)')    
-    
+                        'Dataset description filename (yaml)')
+
     flags.DEFINE_string('results_directory',
                         None,
                         'Results directory')
-    
+
     flags.DEFINE_enum('model',
                       'dcnn',
                       [
@@ -630,7 +636,7 @@ if __name__ == '__main__':
     flags.DEFINE_boolean('print_cr',
                          False,
                          'Print the classification report')
-            
+
     flags.mark_flag_as_required('dataset_directory')
     flags.mark_flag_as_required('dataset_description')
     flags.mark_flag_as_required('results_directory')
