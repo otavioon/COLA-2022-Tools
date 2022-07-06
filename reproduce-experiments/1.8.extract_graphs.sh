@@ -6,11 +6,11 @@ DATASETS=('algo/poj' 'algo/codenet' 'loop/anghabench' 'optz/poj' 'optz/codenet' 
 IR_LEVELS=('IR_O0')
 GRAPH_TYPES=('cfg' 'cfg_compact' 'cdfg' 'cdfg_compact' 'cdfg_plus' 'programl')
 
-for IR in ${IR_LEVELS[@]}
+for GTYPE in ${GRAPH_TYPES[@]}
 do
-  for DATASET in ${DATASETS[@]}
+  for IR in ${IR_LEVELS[@]}
   do
-      for GTYPE in ${GRAPH_TYPES[@]}
+      for DATASET in ${DATASETS[@]}
       do
         python3 $EXTRACTOR_SCRIPT $ROOT_DIR/$DATASET $OUTPUT_DIR/$DATASET \
             --ir-dir $IR --graph-type $GTYPE
