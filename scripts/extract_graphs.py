@@ -108,17 +108,16 @@ def main(
     builder = R.LLVMGraphBuilder(driver)
 
     folders = [p for p in root_dataset_dir.glob("*") if p.is_dir()]
-
     for folder in folders:
         args = [
             (source, root_output_dir, builder, graph_type, ir_dir, folder)
             for source in folder.glob("*.ll")
         ]
 
-    output_files = thread_map(
-        do_generate_graph_and_save, args, max_workers=workers,
-        desc=f"Extracting graph type '{graph_type}' from LLVM '{ir_dir}' to: '{output_dir}'"
-    )
+        output_files = thread_map(
+            do_generate_graph_and_save, args, max_workers=workers,
+            desc=f"Extracting graph type '{graph_type}' from LLVM '{ir_dir}' to: '{output_dir}'"
+        )
     return 0
 
 
