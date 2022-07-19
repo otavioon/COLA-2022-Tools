@@ -1,0 +1,23 @@
++ ALG_DIR=../../scripts
++ REPRESENTATION_DIR=../../datasets/representations
++ RESULT_DIR=../../results
++ DATASETS=('algo/poj' 'algo/codenet' 'loop/anghabench' 'optz/anghabench' 'optz/poj' 'optz/poj_s' 'optz/codenet')
++ REPRESENTATION=lbpif
++ DATASET_DIR=../../datasets/src
++ mkdir ../../results
+mkdir: cannot create directory ‘../../results’: File exists
++ for p in 'algo' 'optz' 'loop'
++ mkdir ../../results/algo
+mkdir: cannot create directory ‘../../results/algo’: File exists
++ for p in 'algo' 'optz' 'loop'
++ mkdir ../../results/optz
+mkdir: cannot create directory ‘../../results/optz’: File exists
++ for p in 'algo' 'optz' 'loop'
++ mkdir ../../results/loop
+mkdir: cannot create directory ‘../../results/loop’: File exists
++ DATASET=loop/anghabench
++ mkdir ../../results/loop/anghabench_2C
+mkdir: cannot create directory ‘../../results/loop/anghabench_2C’: File exists
++ mkdir ../../results/loop/anghabench_2C/lbpif
+mkdir: cannot create directory ‘../../results/loop/anghabench_2C/lbpif’: File exists
++ python3 ../../scripts/classify.py --dataset_directory=../../datasets/representations/loop/anghabench/lbpif --dataset_description=../../datasets/src/loop/anghabench/dataset_description_2C.yaml --results_directory=../../results/loop/anghabench_2C/lbpif

@@ -37,7 +37,7 @@ from pathlib import Path
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
-from absl import app, flags, logging
+# from absl import app, flags, logging
 
 from sklearn import model_selection
 from sklearn.metrics import confusion_matrix, classification_report
@@ -62,6 +62,7 @@ def load_sequence_dataset(dataset_directory: Path, dataset_description: Path):
     X = {'training': [], 'validation': [], 'test': []}
     Y = {'training': [], 'validation': [], 'test': []}
     labels = []
+    errors = []
 
     for phase, phase_data in description_dataset.items():
         for label, samples in phase_data.items():
@@ -69,11 +70,18 @@ def load_sequence_dataset(dataset_directory: Path, dataset_description: Path):
             labels.append(int_label)
             data_directory = dataset_directory / str(label)
             for sample in samples:
-                filename = data_directory / f"{sample}.npz"
-                representation = np.load(filename)
-                representation = representation['values']
-                Y[phase].append(int_label)
-                X[phase].append(representation)
+                try:
+                    filename = data_directory / f"{sample}.npz"
+                    representation = np.load(filename, allow_pickle=True)
+                    representation = representation['values']
+                    Y[phase].append(int_label)
+                    X[phase].append(representation)
+                except FileNotFoundError:
+                    errors.append(sample)
+                    continue
+
+    if errors:
+        print(f"There are {len(errors)} errored files")    
 
     labels = list(dict.fromkeys(labels))
 
@@ -96,6 +104,7 @@ def load_graph_dataset(dataset_directory: Path, dataset_description: Path):
     Y = {'training': [], 'validation': [], 'test': []}
     Y_index = {'training': [], 'validation': [], 'test': []}
     labels = []
+    errors = list()
 
     for phase, phase_data in description_dataset.items():
         for label, samples in phase_data.items():
@@ -104,12 +113,21 @@ def load_graph_dataset(dataset_directory: Path, dataset_description: Path):
             data_directory = dataset_directory / str(label)
             for sample in samples:
                 filename = data_directory / f"{sample}.pk"
-                with filename.open("rb") as f:
-                    representation = pickle.load(f)
+                try:
+                    with filename.open("rb") as f:
+                        representation = pickle.load(f)
+                except FileNotFoundError as e:
+                    # print(f"Invalid file: {e}")
+                    errors.append(e)
+                    continue
 
-            Y[phase].append(int_label)
-            Y_index[phase].append(len(X))
-            X.append(representation)
+                Y[phase].append(int_label)
+                Y_index[phase].append(len(X))
+                X.append(representation)
+
+    if errors:
+        print(f"There are {len(errors)} errored files")
+        # raise Exception("Error files")
 
     labels = list(dict.fromkeys(labels))
 
@@ -132,296 +150,6 @@ def load_graph_dataset(dataset_directory: Path, dataset_description: Path):
 
     return X, Y_train, Y_val, Y_test, len(labels)
 
-
-
-def execute(argv):
-  """Execute DGCNN."""
-  del argv
-
-  FLAGS = flags.FLAGS
-
-  #
-  # local flags
-  #
-  # CNN or GNN?
-  flags_sequence_datasets = ['histogram_IR_O0',
-                             'inst2vec',
-                             'ir2vec',
-                             'milepost',
-                             'histogram',
-                             'lbpeq',
-                             'lbpif',
-                             'prog2image']
-
-  # CNN 1d or CNN 2d?
-  flags_2d_sequence_datasets = ['inst2vec', 'prog2image']
-
-  # Breakdown the runtime
-  flags_times = {}
-
-  #
-  # Initialize the execution
-  #
-
-  # Measure the initial time
-  initial_time = time.time()
-
-  #
-  # Load the dataset
-  #
-  print('\nLoading the dataset ...')
-  start = time.time()
-
-  if is_graph_dataset(FLAGS.dataset_directory):
-    idx = FLAGS.dataset_directory.rfind('/')
-    embeddings = FLAGS.dataset_directory[idx + 1:]
-
-    graph_name = FLAGS.dataset_directory.replace('/{}'.format(embeddings), '')
-    graph_name = graph_name[graph_name.rfind('/') + 1:]
-    dataset_name = '{}_{}'.format(graph_name, embeddings)
-  else:
-    idx = FLAGS.dataset_directory.rfind('/')
-    dataset_name = FLAGS.dataset_directory[idx + 1:]
-
-  print(f"Dataset name: {dataset_name}")
-
-  if dataset_name in flags_sequence_datasets:
-    print("---------------")
-    X_train, Y_train, X_val, Y_val, X_test, Y_test, FLAGS_labels = load_sequence_dataset(FLAGS.dataset_directory,
-                                                                                         FLAGS.dataset_description)
-  else:
-    X, Y_train, Y_val, Y_test, FLAGS_labels = load_graph_dataset(FLAGS.dataset_directory,
-                                                                 FLAGS.dataset_description)
-
-  end = time.time()
-
-  # Store load time
-  flags_times['loading'] = end - start
-
-  #
-  # Prepare the dataset
-  #
-  print('\nPreparing the dataset ...')
-  if dataset_name in flags_sequence_datasets:
-
-    # 1D Model
-    if dataset_name not in flags_2d_sequence_datasets:
-      X_train = X_train.reshape(X_train.shape[0], X_train.shape[1], 1)
-      X_val = X_val.reshape(X_val.shape[0], X_val.shape[1], 1)
-      X_test = X_test.reshape(X_test.shape[0], X_test.shape[1], 1)
-    else:
-      # 2D Model
-      if FLAGS.model != 'lstm':
-        X_train = X_train.reshape(X_train.shape[0], X_train.shape[1], X_train.shape[2], 1)
-        X_val = X_val.reshape(X_val.shape[0], X_val.shape[1], X_val.shape[2], 1)
-        X_test = X_test.reshape(X_test.shape[0], X_test.shape[1], X_test.shape[2], 1)
-
-  else:
-
-    # Graph
-    gen = PaddedGraphGenerator(graphs=X)
-
-    train_gen = gen.flow(list(Y_train.index),
-                         targets=Y_train.values,
-                         batch_size=50,
-                         symmetric_normalization=False)
-    val_gen = gen.flow(list(Y_val.index),
-                       targets=Y_val.values,
-                       batch_size=1,
-                       symmetric_normalization=False)
-    test_gen = gen.flow(list(Y_test.index),
-                        targets=Y_test.values,
-                        batch_size=1,
-                        symmetric_normalization=False)
-
-  #
-  # Create the model
-  #
-  if dataset_name in flags_sequence_datasets:
-    # Sequence
-    model_type = '1d' if dataset_name not in flags_2d_sequence_datasets else '2d'
-
-    input_shape = X_train[0].shape
-    embedding_dim =  X_train[0].shape[0] if model_type == '1d' else X_train[0].shape[1]
-
-    if FLAGS.model == 'lstm':
-      model = create_model_lstm(FLAGS_labels,
-                                input_shape,
-                                embedding_dim)
-    elif FLAGS.model == 'dcnn':
-      model = create_model_dcnn(FLAGS_labels,
-                                input_shape,
-                                model_type)
-    else:
-      logging.error('Model error.')
-      sys.exit(1)
-
-  else:
-    # Graph
-
-    if FLAGS.model == 'gcn':
-      model = create_model_gcn(FLAGS_labels,
-                               X)
-    elif FLAGS.model == 'dgcnn':
-      model = create_model_dgcnn(FLAGS_labels,
-                                 X)
-    else:
-      logging.error('Model error.')
-      sys.exit(1)
-
-  model.compile(optimizer=Adam(learning_rate=0.0001),
-                loss=categorical_crossentropy,
-                metrics=['accuracy'])
-
-  if FLAGS.print_model:
-    print()
-    model.summary()
-
-  #
-  # Create the output directory
-  #
-  os.makedirs(FLAGS.results_directory, exist_ok=True)
-
-  #
-  # Training
-  #
-  for round_ in range(FLAGS.rounds):
-    print('\n\n**** ROUND:', round_)
-
-    print('\nTraining ...')
-    if FLAGS.verbose:
-      print()
-
-    start = time.time()
-
-    es_callback = EarlyStopping(monitor="val_accuracy",
-                                patience=FLAGS.patience,
-                                restore_best_weights=True)
-
-    if dataset_name in flags_sequence_datasets:
-      history = model.fit(X_train,
-                          Y_train,
-                          validation_data=(X_val, Y_val),
-                          epochs=FLAGS.epochs,
-                          verbose=1 if FLAGS.verbose else 0,
-                          shuffle=True,
-                          callbacks=[es_callback])
-    else:
-      history = model.fit(train_gen,
-                          validation_data=val_gen,
-                          epochs=FLAGS.epochs,
-                          verbose=1 if FLAGS.verbose else 0,
-                          shuffle=True,
-                          callbacks=[es_callback])
-
-    end = time.time()
-
-    # Store the training time
-    flags_times['training'] = end - start
-
-    #
-    # Testing
-    #
-    print('\nTesting ...\n')
-    start = time.time()
-
-    if dataset_name in flags_sequence_datasets:
-      test_metrics = model.evaluate(X_test, Y_test)
-    else:
-      test_metrics = model.evaluate(test_gen)
-
-    end = time.time()
-
-    # Store the testing time
-    flags_times['evaluating'] = end - start
-
-    # Print test metrics
-    test_metrics_dict = {}
-    for name, val in zip(model.metrics_names, test_metrics):
-      print('{}: {:0.4f}'.format(name, val), flush=True)
-      test_metrics_dict[name] = val
-
-    #
-    # Predicting
-    #
-    print('\nPredicting ...')
-    start = time.time()
-
-    if dataset_name in flags_sequence_datasets:
-      predicted = model.predict(X_test)
-    else:
-      predicted = model.predict(test_gen)
-
-    end = time.time()
-
-    # Store the predicting time
-    flags_times['predicting'] = end - start
-
-    #
-    # Statistic
-    #
-    print('\nCalculating statistics ...')
-    pred_y = predicted.argmax(axis=-1)
-    cm = confusion_matrix(Y_test.idxmax(axis=1), pred_y)
-    cr = classification_report(Y_test.idxmax(axis=1), pred_y)
-
-    if FLAGS.print_cm:
-      print('\nConfusion matrix')
-      print(cm)
-
-    if FLAGS.print_cr:
-      print('\nClassification report')
-      print(cr)
-
-    #
-    # Finalize the execution
-    #
-
-    # Measure the final time
-    final_time = time.time()
-
-    flags_times['elapsed'] = final_time - initial_time
-
-    # Create the output directory
-    print('\nStoring the results ...')
-
-    # Store the history
-    fout = open('{}/history_{}.yaml'.format(FLAGS.results_directory, round_), 'w')
-    yl.dump(history.history, fout)
-    fout.close()
-
-    # Store the test metrics
-    fout = open('{}/test_metrics_{}.yaml'.format(FLAGS.results_directory, round_), 'w')
-    yl.dump(test_metrics_dict, fout)
-    fout.close()
-
-    # Store the description of the dataset
-    if dataset_name in flags_sequence_datasets:
-      np.savez_compressed('{}/y_train_{}.npz'.format(FLAGS.results_directory, round_), values=Y_train)
-      np.savez_compressed('{}/y_val_{}.npz'.format(FLAGS.results_directory, round_), values=Y_val)
-      np.savez_compressed('{}/y_test_{}.npz'.format(FLAGS.results_directory, round_), values=Y_test)
-    else:
-      Y_train.to_pickle('{}/train_graphs_{}.pkl'.format(FLAGS.results_directory, round_))
-      Y_val.to_pickle('{}/val_graphs_{}.pkl'.format(FLAGS.results_directory, round_))
-      Y_test.to_pickle('{}/test_graphs_{}.pkl'.format(FLAGS.results_directory, round_))
-
-    # Store the prediction
-    np.savez_compressed('{}/predicted_{}'.format(FLAGS.results_directory, round_), values=predicted)
-
-    # Store the confusion matrix
-    np.savez_compressed('{}/confusion_matrix_{}'.format(FLAGS.results_directory, round_), values=cm)
-
-    # Store the classification report
-    fout = open('{}/classification_report_{}.pk'.format(FLAGS.results_directory, round_), 'wb')
-    pk.dump(cr, fout)
-    fout.close()
-
-    # Store the elapsed time
-    fout = open('{}/elapsed_time_{}.yaml'.format(FLAGS.results_directory, round_), 'w')
-    yl.dump(flags_times, fout)
-    fout.close()
-
-    print('\nElapsed time:', flags_times['elapsed'], '(s)')
 
 def is_graph_dataset(dataset_dir):
     dataset_directory = str(dataset_dir)
@@ -449,6 +177,8 @@ def main(
         'inst2vec', 'ir2vec', 'milepost', 'histogram',
         'lbpeq', 'lbpif', 'prog2image'
     ]
+    graph_dataset = is_graph_dataset(root_dataset_dir)
+    print(f"Is graph dataset: {graph_dataset}")
 
     sequence_representations_2d = ['inst2vec', 'prog2image']
 
@@ -459,7 +189,7 @@ def main(
     initial_time = time.time()
     start = time.time()
 
-    if representation in sequence_representations:
+    if not graph_dataset:
         X_train, Y_train, X_val, Y_val, X_test, \
         Y_test, labels = load_sequence_dataset(
             dataset_directory=root_dataset_dir,
@@ -481,7 +211,7 @@ def main(
             )
 
     else:
-        X, Y_train, Y_val, Y_test, FLAGS_labels = load_graph_dataset(
+        X, Y_train, Y_val, Y_test, labels = load_graph_dataset(
             dataset_directory=root_dataset_dir,
             dataset_description=description_file
         )
@@ -507,7 +237,7 @@ def main(
 
     start = time.time()
 
-    if representation in sequence_representations:
+    if not graph_dataset:
         model_dim = "2d" if representation in sequence_representations_2d else "1d"
         input_shape = X_train[0].shape
         embedding_dim =  X_train[0].shape[0] if model_type == '1d' else X_train[0].shape[1]
@@ -519,8 +249,12 @@ def main(
         else:
             raise ValueError(f"Invalid model_type: {model_type}")
     else:
-        if model_type == "gcn" or model_type == "dgcnn":
+        if model_type == "gcn":
             model = create_model_gcn(labels, X)
+        elif model_type == "dgcnn":
+            model = create_model_dgcnn(labels, X)
+        else:
+            raise ValueError(f"Invalid model_type: {model_type}")
 
     model.compile(optimizer=Adam(learning_rate=0.0001),
                   loss=categorical_crossentropy,
@@ -531,7 +265,10 @@ def main(
     if print_model:
         model.summary()
 
+    # ------------ Do execution ------------
     for round in range(rounds):
+        print(f" ------ Start execution of round {round+1}/{rounds} ------ ")
+        round_start_time = time.time()
         callbacks = []
         if patience > 0:
             es_callback = EarlyStopping(
@@ -540,13 +277,14 @@ def main(
             )
             callbacks.append(es_callback)
 
-        if representation in sequence_representations:
+        # Is sequence or graph representations?
+        if not graph_dataset:
             start = time.time()
             history = model.fit(
                 X_train, Y_train, validation_data=(X_val, Y_val),
                 epochs=epochs, verbose=False if silent else True,
                 shuffle=True, callbacks=callbacks, batch_size=batch_size)
-            times[f"train round {round}"] = time.time()-start
+            times[f"train"] = time.time()-start
 
             start = time.time()
             test_metrics = model.evaluate(X_test, Y_test)
@@ -556,6 +294,7 @@ def main(
             predicted = model.predict(X_test)
             times[f"test predict round {round}"] = time.time()-start
 
+        # Graph
         else:
             start = time.time()
             history = model.fit(
@@ -569,21 +308,69 @@ def main(
             times[f"test round {round}"] = time.time()-start
 
             start = time.time()
-            predicted = model.predict(X_test)
+            predicted = model.predict(test_gen)
             times[f"test predict round {round}"] = time.time()-start
-
 
         pred_y = predicted.argmax(axis=-1)
         conf_matrix = confusion_matrix(Y_test.idxmax(axis=1), pred_y)
         class_report = classification_report(Y_test.idxmax(axis=1), pred_y)
 
+        test_metrics_dict = {
+            name: val
+            for name, val in zip(model.metrics_names, test_metrics)
+        }
+
         if stats:
             print(conf_matrix)
             print(class_report)
+            print(f"Accuracy: {history.history['accuracy'][-1]}")
+            print(f"Test metrics: {test_metrics_dict}")
+
+        round_output_dir = output_dir / f"round{round+1}"
+        round_output_dir.mkdir(parents=True, exist_ok=True)
+        # Save all the files
+        history_file = round_output_dir / f"history.yaml"
+        with history_file.open("w") as f:
+            yaml.dump(history.history, f)
+        print(f"History saved to {history_file}")
+
+        test_metrics_file = round_output_dir / f"test_metrics.yaml"
+        with test_metrics_file.open("w") as f:
+            yaml.dump(test_metrics_dict, f)
+        print(f"Test metrics saved to {test_metrics_file}")
+
+        if not graph_dataset:
+            np.savez_compressed(round_output_dir / f"y_train.npz", values=Y_train)
+            np.savez_compressed(round_output_dir / f"y_val.npz", values=Y_val)
+            np.savez_compressed(round_output_dir / f"y_test.npz", values=Y_test)
+        else:
+            Y_train.to_pickle(round_output_dir / f"train_graphs.npz")
+            Y_val.to_pickle(round_output_dir / f"val_graphs.npz")
+            Y_test.to_pickle(round_output_dir / f"test_graphs.npz")
+
+        np.savez_compressed(round_output_dir / f"predicted", values=predicted)
+        np.savez_compressed(round_output_dir / f"confusion_matrix", values=conf_matrix)
+
+        class_report_file = round_output_dir / f"classification_report.pk"
+        with class_report_file.open("wb") as f:
+            pickle.dump(class_report, f)
+        print(f"Classification report saved to {class_report_file}")
+
+        round_end_time = time.time()-round_start_time
+        times[f"full loop round {round}"] = round_end_time
+        print(f'Round {round} took {round_end_time:.3f} seconds')
+        print()
 
 
     times["total"] = time.time()-initial_time
-    print(times)
+    # if stats:
+    #     print(" ---- Times ---- ")
+    #     print(yaml.dump(times, indent=4, sort_keys=True))
+
+    times_file = output_dir / "elapsed_time.yaml"
+    with times_file.open("w") as f:
+        yaml.dump(times, f)
+
     return 0
 
 

@@ -25,7 +25,7 @@ import sys
 import numpy as np
 
 from pathlib import Path
-from tqdm.contrib.concurrent import thread_map
+from tqdm.contrib.concurrent import thread_map, process_map
 from collections import defaultdict
 import argparse
 import tqdm
@@ -66,13 +66,13 @@ def main(root_dataset_dir: Path, root_output_dir: Path, ir_dir: str, workers: in
     unk_idx, _ = Inst2Vec.unknown
     embeddings = Inst2Vec.embeddings
 
-    args = []
 
-    for folder, data in inst2vec.items():
+    for folder_no, (folder, data) in enumerate(inst2vec.items()):
         # Create the output directory.
         output_dir = root_output_dir / f"inst2vec_{ir_dir}" / folder.stem
         output_dir.mkdir(parents=True, exist_ok=True)
 
+        args = []
         for bench, indexes in data.items():
             padding = [list(embeddings[idx]) for idx in indexes]
             for i in range(len(indexes), max_length):
@@ -81,10 +81,18 @@ def main(root_dataset_dir: Path, root_output_dir: Path, ir_dir: str, workers: in
             filename = output_dir / bench
             args.append((filename, padding))
 
-    thread_map(
-        do_save_embeddings, args, max_workers=workers,
-        desc=f"Saving compressed files..."
-    )
+        thread_map(
+           do_save_embeddings, args, max_workers=workers,
+           desc=f"Saving compressed files ({folder_no+1}/{len(inst2vec)})..."
+        )
+
+    #process_map(
+    #    do_save_embeddings, args, max_workers=workers,
+    #    chunksize=4,
+    #    desc=f"Saving compressed files..."
+    #)
+    # for arg in tqdm.tqdm(args):
+    #     do_save_embeddings(arg)
 
 # Execute
 if __name__ == '__main__':

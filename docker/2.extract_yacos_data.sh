@@ -1,4 +1,5 @@
 #!/bin/bash
 
 tar -xvf yacos_data.tar.xz
-mv .local ..
+mkdir -p ../.local/yacos
+mv data ../.local/yacos

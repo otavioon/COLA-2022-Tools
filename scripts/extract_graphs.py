@@ -42,7 +42,7 @@ from yacos.info.compy.extractors import LLVMDriver
 def extract_graph_data(graph):
     """Extract edges, nodes and embeddings."""
     nodes = {}
-    # nodes['histogram'] = graph.get_nodes_histogram_embeddings('ir')
+    nodes['histogram'] = graph.get_nodes_histogram_embeddings('ir')
     nodes['inst2vec'] = graph.get_nodes_inst2vec_embeddings()
     nodes['ir2vec'] = graph.get_nodes_ir2vec_embeddings()
     edges = graph.get_edges_str_dataFrame()
@@ -109,11 +109,10 @@ def main(
 
     folders = [p for p in root_dataset_dir.glob("*") if p.is_dir()]
 
-    for folder in folders:
-        args = [
-            (source, root_output_dir, builder, graph_type, ir_dir, folder)
-            for source in folder.glob("*.ll")
-        ]
+    args = [
+        (source, root_output_dir, builder, graph_type, ir_dir, folder)
+        for folder in folders for source in folder.glob("*.ll")
+    ]
 
     output_files = thread_map(
         do_generate_graph_and_save, args, max_workers=workers,
@@ -142,6 +141,7 @@ if __name__ == '__main__':
     parser.add_argument("--workers", type=int, default=None,
                         help="Number of concurrent processes")
     args = parser.parse_args()
+    print("Extracting graph representation....")
     print(args)
 
     root_dataset_dir = Path(args.root_dataset_dir)

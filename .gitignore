@@ -2,9 +2,6 @@ YaCos/
 datasets/obj/*
 datasets/representations/*
 results_rep/*
-.local/*
-.bash_history
-.python_history
-.cache/*
-.keras/*
 */__pycache__/*
+.*
+!.gitignore

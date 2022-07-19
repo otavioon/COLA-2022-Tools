@@ -6,6 +6,7 @@
 source ./vars.sh
 
 $CONTAINER_CMD run --interactive --tty --rm \
+  --gpus all \
   --env "HOME=$VOLUME_DIR" \
   --env "SHELL=/bin/bash" \
   --workdir $VOLUME_DIR \
