@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 full loop round 0: 191.61453366279602
 full loop round 1: 441.5258524417877
 full loop round 2: 184.7538993358612
@@ -43,6 +44,8 @@ train round 7: 213.0454022884369
 train round 8: 167.91152048110962
 train round 9: 174.11328601837158
 =======
+=======
+>>>>>>> a517d0559f6947fde07bdea72a9181e383753eb5
 full loop round 0: 169.94658946990967
 full loop round 1: 166.91067218780518
 full loop round 2: 171.86040234565735
@@ -86,4 +89,7 @@ train round 6: 155.66013956069946
 train round 7: 157.05081748962402
 train round 8: 153.07565641403198
 train round 9: 162.2202537059784
+<<<<<<< HEAD
+>>>>>>> a517d0559f6947fde07bdea72a9181e383753eb5
+=======
 >>>>>>> a517d0559f6947fde07bdea72a9181e383753eb5
