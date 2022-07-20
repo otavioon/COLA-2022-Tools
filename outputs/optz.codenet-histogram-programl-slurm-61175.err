@@ -1,0 +1,41 @@
+WARNING:tensorflow:AutoGraph could not transform <bound method GraphConvolution.call of <stellargraph.layer.gcn.GraphConvolution object at 0x2b359d24fa30>> and will run it as-is.
+Please report this to the TensorFlow team. When filing the bug, set the verbosity to 10 (on Linux, `export AUTOGRAPH_VERBOSITY=10`) and attach the full output.
+Cause: module 'gast' has no attribute 'Index'
+To silence this warning, decorate the function with @tf.autograph.experimental.do_not_convert
+WARNING:tensorflow:AutoGraph could not transform <bound method SortPooling.call of <stellargraph.layer.sort_pooling.SortPooling object at 0x2b359d1a5400>> and will run it as-is.
+Please report this to the TensorFlow team. When filing the bug, set the verbosity to 10 (on Linux, `export AUTOGRAPH_VERBOSITY=10`) and attach the full output.
+Cause: module 'gast' has no attribute 'Index'
+To silence this warning, decorate the function with @tf.autograph.experimental.do_not_convert
+WARNING:tensorflow:From /home/ldap/otavioon/.conda/envs/cola-2022/lib/python3.8/site-packages/tensorflow/python/util/deprecation.py:605: calling map_fn_v2 (from tensorflow.python.ops.map_fn) with dtype is deprecated and will be removed in a future version.
+Instructions for updating:
+Use fn_output_signature instead
+WARNING:tensorflow:AutoGraph could not transform <bound method SortPooling._sort_tensor_with_mask of <stellargraph.layer.sort_pooling.SortPooling object at 0x2b359d1a5400>> and will run it as-is.
+Please report this to the TensorFlow team. When filing the bug, set the verbosity to 10 (on Linux, `export AUTOGRAPH_VERBOSITY=10`) and attach the full output.
+Cause: module 'gast' has no attribute 'Index'
+To silence this warning, decorate the function with @tf.autograph.experimental.do_not_convert
+Traceback (most recent call last):
+  File "scripts/classify_2.py", line 420, in <module>
+    ret_code = main(
+  File "scripts/classify_2.py", line 300, in main
+    history = model.fit(
+  File "/home/ldap/otavioon/.conda/envs/cola-2022/lib/python3.8/site-packages/tensorflow/python/keras/engine/training.py", line 1050, in fit
+    data_handler = data_adapter.DataHandler(
+  File "/home/ldap/otavioon/.conda/envs/cola-2022/lib/python3.8/site-packages/tensorflow/python/keras/engine/data_adapter.py", line 1100, in __init__
+    self._adapter = adapter_cls(
+  File "/home/ldap/otavioon/.conda/envs/cola-2022/lib/python3.8/site-packages/tensorflow/python/keras/engine/data_adapter.py", line 902, in __init__
+    super(KerasSequenceAdapter, self).__init__(
+  File "/home/ldap/otavioon/.conda/envs/cola-2022/lib/python3.8/site-packages/tensorflow/python/keras/engine/data_adapter.py", line 779, in __init__
+    peek, x = self._peek_and_restore(x)
+  File "/home/ldap/otavioon/.conda/envs/cola-2022/lib/python3.8/site-packages/tensorflow/python/keras/engine/data_adapter.py", line 913, in _peek_and_restore
+    return x[0], x
+  File "/home/ldap/otavioon/.conda/envs/cola-2022/lib/python3.8/site-packages/stellargraph/mapper/padded_graph_generator.py", line 326, in __getitem__
+    padded = [
+  File "/home/ldap/otavioon/.conda/envs/cola-2022/lib/python3.8/site-packages/stellargraph/mapper/padded_graph_generator.py", line 327, in <listcomp>
+    self._pad_graphs(g, adj, max_nodes) for g, adj in zip(graphs, adj_graphs)
+  File "/home/ldap/otavioon/.conda/envs/cola-2022/lib/python3.8/site-packages/stellargraph/mapper/padded_graph_generator.py", line 291, in _pad_graphs
+    adj_graphs = np.stack([adj.toarray() for adj in adj_graphs])
+  File "<__array_function__ internals>", line 180, in stack
+  File "/home/ldap/otavioon/.conda/envs/cola-2022/lib/python3.8/site-packages/numpy/core/shape_base.py", line 433, in stack
+    return _nx.concatenate(expanded_arrays, axis=axis, out=out)
+  File "<__array_function__ internals>", line 180, in concatenate
+numpy.core._exceptions.MemoryError: Unable to allocate 38.7 GiB for an array with shape (32, 12741, 12741) and data type float64

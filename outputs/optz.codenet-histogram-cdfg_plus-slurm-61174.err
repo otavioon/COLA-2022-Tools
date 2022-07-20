@@ -1,0 +1,16 @@
+WARNING:tensorflow:AutoGraph could not transform <bound method GraphConvolution.call of <stellargraph.layer.gcn.GraphConvolution object at 0x2b97b02867c0>> and will run it as-is.
+Please report this to the TensorFlow team. When filing the bug, set the verbosity to 10 (on Linux, `export AUTOGRAPH_VERBOSITY=10`) and attach the full output.
+Cause: module 'gast' has no attribute 'Index'
+To silence this warning, decorate the function with @tf.autograph.experimental.do_not_convert
+WARNING:tensorflow:AutoGraph could not transform <bound method SortPooling.call of <stellargraph.layer.sort_pooling.SortPooling object at 0x2b97bc0ac1c0>> and will run it as-is.
+Please report this to the TensorFlow team. When filing the bug, set the verbosity to 10 (on Linux, `export AUTOGRAPH_VERBOSITY=10`) and attach the full output.
+Cause: module 'gast' has no attribute 'Index'
+To silence this warning, decorate the function with @tf.autograph.experimental.do_not_convert
+WARNING:tensorflow:From /home/ldap/otavioon/.conda/envs/cola-2022/lib/python3.8/site-packages/tensorflow/python/util/deprecation.py:605: calling map_fn_v2 (from tensorflow.python.ops.map_fn) with dtype is deprecated and will be removed in a future version.
+Instructions for updating:
+Use fn_output_signature instead
+WARNING:tensorflow:AutoGraph could not transform <bound method SortPooling._sort_tensor_with_mask of <stellargraph.layer.sort_pooling.SortPooling object at 0x2b97bc0ac1c0>> and will run it as-is.
+Please report this to the TensorFlow team. When filing the bug, set the verbosity to 10 (on Linux, `export AUTOGRAPH_VERBOSITY=10`) and attach the full output.
+Cause: module 'gast' has no attribute 'Index'
+To silence this warning, decorate the function with @tf.autograph.experimental.do_not_convert
+/var/spool/slurm/d/job61174/slurm_script: line 32: 45880 Segmentation fault      (core dumped) python3 scripts/classify_2.py datasets/representations/optz/codenet/cdfg_plus_histogram_IR_O0 datasets/src/optz/codenet/dataset_description.yaml results/optz/codenet/cdfg_plus_histogram_IR_O0 --representation histogram --model dgcnn --stats --rounds 10 --batch_size 32

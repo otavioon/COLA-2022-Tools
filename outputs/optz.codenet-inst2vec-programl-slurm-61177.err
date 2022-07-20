@@ -1,0 +1,83 @@
+WARNING:tensorflow:AutoGraph could not transform <bound method GraphConvolution.call of <stellargraph.layer.gcn.GraphConvolution object at 0x2b51273e5ac0>> and will run it as-is.
+Please report this to the TensorFlow team. When filing the bug, set the verbosity to 10 (on Linux, `export AUTOGRAPH_VERBOSITY=10`) and attach the full output.
+Cause: module 'gast' has no attribute 'Index'
+To silence this warning, decorate the function with @tf.autograph.experimental.do_not_convert
+WARNING:tensorflow:AutoGraph could not transform <bound method SortPooling.call of <stellargraph.layer.sort_pooling.SortPooling object at 0x2b5127549070>> and will run it as-is.
+Please report this to the TensorFlow team. When filing the bug, set the verbosity to 10 (on Linux, `export AUTOGRAPH_VERBOSITY=10`) and attach the full output.
+Cause: module 'gast' has no attribute 'Index'
+To silence this warning, decorate the function with @tf.autograph.experimental.do_not_convert
+WARNING:tensorflow:From /home/ldap/otavioon/.conda/envs/cola-2022/lib/python3.8/site-packages/tensorflow/python/util/deprecation.py:605: calling map_fn_v2 (from tensorflow.python.ops.map_fn) with dtype is deprecated and will be removed in a future version.
+Instructions for updating:
+Use fn_output_signature instead
+WARNING:tensorflow:AutoGraph could not transform <bound method SortPooling._sort_tensor_with_mask of <stellargraph.layer.sort_pooling.SortPooling object at 0x2b5127549070>> and will run it as-is.
+Please report this to the TensorFlow team. When filing the bug, set the verbosity to 10 (on Linux, `export AUTOGRAPH_VERBOSITY=10`) and attach the full output.
+Cause: module 'gast' has no attribute 'Index'
+To silence this warning, decorate the function with @tf.autograph.experimental.do_not_convert
+/home/ldap/otavioon/.conda/envs/cola-2022/lib/python3.8/site-packages/tensorflow/python/framework/indexed_slices.py:435: UserWarning: Converting sparse IndexedSlices(IndexedSlices(indices=Tensor("gradient_tape/model/sort_pooling/map/while/gradients/model/sort_pooling/map/while/GatherV2_grad/Reshape_1:0", shape=(None,), dtype=int32), values=Tensor("gradient_tape/model/sort_pooling/map/while/gradients/model/sort_pooling/map/while/GatherV2_grad/Reshape:0", shape=(None, None), dtype=float32), dense_shape=Tensor("gradient_tape/model/sort_pooling/map/while/gradients/model/sort_pooling/map/while/GatherV2_grad/Cast:0", shape=(2,), dtype=int32))) to a dense Tensor of unknown shape. This may consume a large amount of memory.
+  warnings.warn(
+Traceback (most recent call last):
+  File "scripts/classify_2.py", line 420, in <module>
+    ret_code = main(
+  File "scripts/classify_2.py", line 300, in main
+    history = model.fit(
+  File "/home/ldap/otavioon/.conda/envs/cola-2022/lib/python3.8/site-packages/tensorflow/python/keras/engine/training.py", line 1100, in fit
+    tmp_logs = self.train_function(iterator)
+  File "/home/ldap/otavioon/.conda/envs/cola-2022/lib/python3.8/site-packages/tensorflow/python/eager/def_function.py", line 828, in __call__
+    result = self._call(*args, **kwds)
+  File "/home/ldap/otavioon/.conda/envs/cola-2022/lib/python3.8/site-packages/tensorflow/python/eager/def_function.py", line 888, in _call
+    return self._stateless_fn(*args, **kwds)
+  File "/home/ldap/otavioon/.conda/envs/cola-2022/lib/python3.8/site-packages/tensorflow/python/eager/function.py", line 2942, in __call__
+    return graph_function._call_flat(
+  File "/home/ldap/otavioon/.conda/envs/cola-2022/lib/python3.8/site-packages/tensorflow/python/eager/function.py", line 1918, in _call_flat
+    return self._build_call_outputs(self._inference_function.call(
+  File "/home/ldap/otavioon/.conda/envs/cola-2022/lib/python3.8/site-packages/tensorflow/python/eager/function.py", line 555, in call
+    outputs = execute.execute(
+  File "/home/ldap/otavioon/.conda/envs/cola-2022/lib/python3.8/site-packages/tensorflow/python/eager/execute.py", line 59, in quick_execute
+    tensors = pywrap_tfe.TFE_Py_Execute(ctx._handle, device_name, op_name,
+tensorflow.python.framework.errors_impl.ResourceExhaustedError:  MemoryError: Unable to allocate 46.5 GiB for an array with shape (32, 13970, 13970) and data type float64
+Traceback (most recent call last):
+
+  File "/home/ldap/otavioon/.conda/envs/cola-2022/lib/python3.8/site-packages/tensorflow/python/ops/script_ops.py", line 249, in __call__
+    ret = func(*args)
+
+  File "/home/ldap/otavioon/.conda/envs/cola-2022/lib/python3.8/site-packages/tensorflow/python/autograph/impl/api.py", line 620, in wrapper
+    return func(*args, **kwargs)
+
+  File "/home/ldap/otavioon/.conda/envs/cola-2022/lib/python3.8/site-packages/tensorflow/python/data/ops/dataset_ops.py", line 891, in generator_py_func
+    values = next(generator_state.get_iterator(iterator_id))
+
+  File "/home/ldap/otavioon/.conda/envs/cola-2022/lib/python3.8/site-packages/tensorflow/python/keras/engine/data_adapter.py", line 807, in wrapped_generator
+    for data in generator_fn():
+
+  File "/home/ldap/otavioon/.conda/envs/cola-2022/lib/python3.8/site-packages/tensorflow/python/keras/engine/data_adapter.py", line 933, in generator_fn
+    yield x[i]
+
+  File "/home/ldap/otavioon/.conda/envs/cola-2022/lib/python3.8/site-packages/stellargraph/mapper/padded_graph_generator.py", line 326, in __getitem__
+    padded = [
+
+  File "/home/ldap/otavioon/.conda/envs/cola-2022/lib/python3.8/site-packages/stellargraph/mapper/padded_graph_generator.py", line 327, in <listcomp>
+    self._pad_graphs(g, adj, max_nodes) for g, adj in zip(graphs, adj_graphs)
+
+  File "/home/ldap/otavioon/.conda/envs/cola-2022/lib/python3.8/site-packages/stellargraph/mapper/padded_graph_generator.py", line 291, in _pad_graphs
+    adj_graphs = np.stack([adj.toarray() for adj in adj_graphs])
+
+  File "<__array_function__ internals>", line 180, in stack
+
+  File "/home/ldap/otavioon/.conda/envs/cola-2022/lib/python3.8/site-packages/numpy/core/shape_base.py", line 433, in stack
+    return _nx.concatenate(expanded_arrays, axis=axis, out=out)
+
+  File "<__array_function__ internals>", line 180, in concatenate
+
+numpy.core._exceptions._ArrayMemoryError: Unable to allocate 46.5 GiB for an array with shape (32, 13970, 13970) and data type float64
+
+
+	 [[{{node PyFunc}}]]
+Hint: If you want to see a list of allocated tensors when OOM happens, add report_tensor_allocations_upon_oom to RunOptions for current allocation info.
+
+	 [[IteratorGetNext]]
+Hint: If you want to see a list of allocated tensors when OOM happens, add report_tensor_allocations_upon_oom to RunOptions for current allocation info.
+ [Op:__inference_train_function_2540]
+
+Function call stack:
+train_function
+
