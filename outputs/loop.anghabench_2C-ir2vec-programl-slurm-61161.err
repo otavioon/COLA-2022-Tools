@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "scripts/classify_2.py", line 420, in <module>
+    ret_code = main(
+  File "scripts/classify_2.py", line 218, in main
+    gen = PaddedGraphGenerator(graphs=X)
+  File "/home/ldap/otavioon/.conda/envs/cola-2022/lib/python3.8/site-packages/stellargraph/mapper/padded_graph_generator.py", line 55, in __init__
+    self._check_graphs(graphs)
+  File "/home/ldap/otavioon/.conda/envs/cola-2022/lib/python3.8/site-packages/stellargraph/mapper/padded_graph_generator.py", line 86, in _check_graphs
+    raise ValueError(
+ValueError: graphs: expected node features for all graph to have same dimensions,found 300 vs 200
