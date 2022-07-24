@@ -66,20 +66,22 @@ def main(root_dataset_dir: Path, root_output_dir: Path, ir_dir: str, workers: in
     unk_idx, _ = Inst2Vec.unknown
     embeddings = Inst2Vec.embeddings
 
-
     for folder_no, (folder, data) in enumerate(inst2vec.items()):
         # Create the output directory.
         output_dir = root_output_dir / f"inst2vec_{ir_dir}" / folder.stem
         output_dir.mkdir(parents=True, exist_ok=True)
 
         args = []
-        for bench, indexes in data.items():
+        for bench, indexes in tqdm.tqdm(data.items()):
             padding = [list(embeddings[idx]) for idx in indexes]
             for i in range(len(indexes), max_length):
-                padding += list(embeddings[unk_idx])
+                padding.append(embeddings[unk_idx])
 
             filename = output_dir / bench
-            args.append((filename, padding))
+            args.append((filename, np.array(padding)))
+            # print(padding, len(padding))
+
+            # np.savez_compressed(filename, values=np.array(padding))
 
         thread_map(
            do_save_embeddings, args, max_workers=workers,

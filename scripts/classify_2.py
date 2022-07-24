@@ -81,7 +81,7 @@ def load_sequence_dataset(dataset_directory: Path, dataset_description: Path):
                     continue
 
     if errors:
-        print(f"There are {len(errors)} errored files")    
+        print(f"There are {len(errors)} errored files")
 
     labels = list(dict.fromkeys(labels))
 
@@ -199,7 +199,8 @@ def main(
             X_train = X_train.reshape(X_train.shape[0], X_train.shape[1], 1)
             X_val = X_val.reshape(X_val.shape[0], X_val.shape[1], 1)
             X_test = X_test.reshape(X_test.shape[0], X_test.shape[1], 1)
-        elif model != "lstm":
+        elif model_type != "lstm":
+            print(f"shape of X_train: {X_train.shape}")
             X_train = X_train.reshape(
                 X_train.shape[0], X_train.shape[1], X_train.shape[2], 1
             )
@@ -267,7 +268,7 @@ def main(
 
     # ------------ Do execution ------------
     for round in range(rounds):
-        print(f" ------ Start execution of round {round+1}/{rounds} ------ ")
+        print(f" ------ Start execution of round {round}/{rounds-1} ------ ")
         round_start_time = time.time()
         callbacks = []
         if patience > 0:

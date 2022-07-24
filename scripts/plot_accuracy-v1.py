@@ -101,13 +101,14 @@ if __name__ == '__main__':
         "cfg_ir2vec_IR_O0": "cfg : ir2vec",
         "histogram_IR_O0": "histogram",
         "ir2vec_IR_O0": "ir2vec",
+        "inst2vec_IR_O0": "inst2vec",
         "milepost_IR_O0": "milepost",
         "programl_histogram_IR_O0": "programl : histogram",
         "programl_inst2vec_IR_O0": "programl : inst2vec",
         "programl_ir2vec_IR_O0": "programl : ir2vec",
         "lbpeq": "lbpeq",
         "lbpif": "lbpif",
-        "prog2img": "prog2img"
+        "prog2image": "prog2img"
     }
 
     if not args.rename:

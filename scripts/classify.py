@@ -206,7 +206,7 @@ def load_sequence_dataset(dataset_directory,
 
         try:
           # print(f"Loading from {data_directory}/{sample}.npz")
-          representation = np.load('{}/{}.npz'.format(data_directory, sample))
+          representation = np.load('{}/{}.npz'.format(data_directory, sample), allow_pickle=True)
         except:
           print('Erro load', data_directory, sample, flush=True)
           raise
@@ -351,7 +351,7 @@ def execute(argv):
 
   print(f"Dataset name: {dataset_name}")
 
-  if dataset_name in flags_sequence_datasets:
+  if dataset_name.split("_")[0] in flags_sequence_datasets:
     print("---------------")
     X_train, Y_train, X_val, Y_val, X_test, Y_test, FLAGS_labels = load_sequence_dataset(FLAGS.dataset_directory,
                                                                                          FLAGS.dataset_description)
@@ -368,10 +368,10 @@ def execute(argv):
   # Prepare the dataset
   #
   print('\nPreparing the dataset ...')
-  if dataset_name in flags_sequence_datasets:
+  if dataset_name.split("_")[0] in flags_sequence_datasets:
 
     # 1D Model
-    if dataset_name not in flags_2d_sequence_datasets:
+    if dataset_name.split("_")[0] not in flags_2d_sequence_datasets:
       X_train = X_train.reshape(X_train.shape[0], X_train.shape[1], 1)
       X_val = X_val.reshape(X_val.shape[0], X_val.shape[1], 1)
       X_test = X_test.reshape(X_test.shape[0], X_test.shape[1], 1)
@@ -403,9 +403,9 @@ def execute(argv):
   #
   # Create the model
   #
-  if dataset_name in flags_sequence_datasets:
+  if dataset_name.split("_")[0] in flags_sequence_datasets:
     # Sequence
-    model_type = '1d' if dataset_name not in flags_2d_sequence_datasets else '2d'
+    model_type = '1d' if dataset_name.split("_")[0] not in flags_2d_sequence_datasets else '2d'
 
     input_shape = X_train[0].shape
     embedding_dim =  X_train[0].shape[0] if model_type == '1d' else X_train[0].shape[1]
@@ -464,7 +464,7 @@ def execute(argv):
                                 patience=FLAGS.patience,
                                 restore_best_weights=True)
 
-    if dataset_name in flags_sequence_datasets:
+    if dataset_name.split("_")[0] in flags_sequence_datasets:
       history = model.fit(X_train,
                           Y_train,
                           validation_data=(X_val, Y_val),
@@ -491,7 +491,7 @@ def execute(argv):
     print('\nTesting ...\n')
     start = time.time()
 
-    if dataset_name in flags_sequence_datasets:
+    if dataset_name.split("_")[0] in flags_sequence_datasets:
       test_metrics = model.evaluate(X_test, Y_test)
     else:
       test_metrics = model.evaluate(test_gen)
@@ -513,7 +513,7 @@ def execute(argv):
     print('\nPredicting ...')
     start = time.time()
 
-    if dataset_name in flags_sequence_datasets:
+    if dataset_name.split("_")[0] in flags_sequence_datasets:
       predicted = model.predict(X_test)
     else:
       predicted = model.predict(test_gen)
@@ -562,7 +562,7 @@ def execute(argv):
     fout.close()
 
     # Store the description of the dataset
-    if dataset_name in flags_sequence_datasets:
+    if dataset_name.split("_")[0] in flags_sequence_datasets:
       np.savez_compressed('{}/y_train_{}.npz'.format(FLAGS.results_directory, round_), values=Y_train)
       np.savez_compressed('{}/y_val_{}.npz'.format(FLAGS.results_directory, round_), values=Y_val)
       np.savez_compressed('{}/y_test_{}.npz'.format(FLAGS.results_directory, round_), values=Y_test)
