@@ -43,8 +43,6 @@ def plot_v_box_plot(results, output_filename: Path = None, rename_map: dict = No
     labels = []
     datasets = []
     for result_label, res in sorted_results:
-        if result_label == "cdfg_plus_ir2vec":
-            continue
         if rename_map:
             labels.append(rename_map[result_label]) # Cut three first digits
         else:
@@ -52,14 +50,15 @@ def plot_v_box_plot(results, output_filename: Path = None, rename_map: dict = No
         datasets.append(res)
 
     # Vertical Box Plor
-    bplot1 = ax.boxplot(datasets, vert = True, patch_artist = True)
+    bplot1 = ax.boxplot(datasets, vert=True, patch_artist=True, showfliers=False, manage_ticks=True)
 
     ax.set_ylim([0, 1])
+    ax.set_yticks(np.linspace(0, 1, 11))
     ax.set_ylabel('Accuracy')
     ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
     #ax.set_title('CHART TITLE')
     ax.grid()
-    ax.set_xticklabels(labels, fontname="Times")
+    ax.set_xticklabels(labels, fontname="Times New Roman")
     fig.autofmt_xdate(rotation=45)
     if output_filename is not None:
         output_filename.parent.mkdir(parents=True, exist_ok=True)
@@ -79,7 +78,7 @@ if __name__ == '__main__':
     import matplotlib
     matplotlib.rcParams['pdf.fonttype'] = 42
     matplotlib.rcParams['ps.fonttype'] = 42
-    matplotlib.rc('font',**{'family':'serif','serif':['Times']})
+    matplotlib.rc('font',**{'family':'serif','serif':['Times New Roman']})
     #rc('text', usetex=True)
 
     results = collect_results(Path(args.results_directory), args.dataset)

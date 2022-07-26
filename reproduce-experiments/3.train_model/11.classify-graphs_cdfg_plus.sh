@@ -3,6 +3,7 @@ REPRESENTATION_DIR=../../datasets/representations
 DATASET_DIR=../../datasets/src
 RESULT_DIR=../../results
 DATASETS=('algo/poj' 'algo/codenet' 'loop/anghabench' 'optz/anghabench' 'optz/poj' 'optz/poj_s' 'optz/codenet')
+# DATASETS=('algo/poj')
 REPRESENTATIONS=('inst2vec' 'ir2vec' 'histogram')
 IRDIR="IR_O0"
 REPTYPE="cdfg_plus"

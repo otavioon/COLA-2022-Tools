@@ -35,6 +35,8 @@ import datetime
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 from absl import app, flags, logging
+import tqdm
+
 
 from sklearn import model_selection
 from sklearn.metrics import confusion_matrix, classification_report
@@ -191,10 +193,13 @@ def load_sequence_dataset(dataset_directory,
   Y = {'training': [], 'validation': [], 'test': []}
 
   labels = []
+  errors = []
 
   for phase, phase_data in description_dataset.items():
 
-    for label, samples in phase_data.items():
+    vals = []
+
+    for label, samples in tqdm.tqdm(phase_data.items(), desc=f"Loading {phase} data..."):
 
       int_label = int(label)
 
@@ -207,24 +212,31 @@ def load_sequence_dataset(dataset_directory,
         try:
           # print(f"Loading from {data_directory}/{sample}.npz")
           representation = np.load('{}/{}.npz'.format(data_directory, sample), allow_pickle=True)
-        except:
-          print('Erro load', data_directory, sample, flush=True)
-          raise
+        except Exception as e:
+          # print('Erro load', data_directory, sample, flush=True)
+          # raise
+          errors.append(sample)
+          continue
 
         representation = representation['values']
 
         Y[phase].append(int_label)
-        X[phase].append(representation)
+        vals.append(representation)
+
+    X[phase] = np.array(vals)
+
+  if len(errors) != 0:
+      print(f"There are {len(errors)} errored files!")
 
   labels = list(dict.fromkeys(labels))
 
-  X_train = np.array(X['training'])
-  X_val = np.array(X['validation'])
-  X_test = np.array(X['test'])
+  X_train = X['training']
+  X_val = X['validation']
+  X_test = X['test']
 
-  Y_train = np.array(Y['training'])
-  Y_val = np.array(Y['validation'])
-  Y_test = np.array(Y['test'])
+  Y_train = Y['training']
+  Y_val = Y['validation']
+  Y_test = Y['test']
 
   del X, Y
 
