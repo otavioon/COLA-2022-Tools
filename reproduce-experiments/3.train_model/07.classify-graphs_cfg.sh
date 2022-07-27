@@ -18,8 +18,7 @@ do
                 --model $MODEL \
                 --representation $REPRESENTATION \
                 --stats \
-                --rounds 10 \
-		--batch_size 32
+                --rounds 10
     done
 done
 

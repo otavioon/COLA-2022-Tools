@@ -1,33 +1,32 @@
-ALG_DIR=../../scripts
+SCRIPT_FILE="$(realpath ../../scripts/classify_2.py)"
 REPRESENTATION_DIR=../../datasets/representations
-RESULT_DIR=../../results
-# DATASETS=('algo/poj' 'algo/codenet' 'loop/anghabench' 'optz/anghabench' 'optz/poj' 'optz/poj_s' 'optz/codenet')
-DATASETS=('algo/codenet')
-REPRESENTATION='prog2image'
 DATASET_DIR=../../datasets/src
-
-
-
-mkdir ${RESULT_DIR}
-for p in 'algo' 'optz' 'loop'
-do
-    mkdir ${RESULT_DIR}/$p
-done
-
-# DATASET='loop/anghabench'
-#
-# mkdir ${RESULT_DIR}/${DATASET}_2C
-# mkdir ${RESULT_DIR}/${DATASET}_2C/${REPRESENTATION}
-#
-# python3 $ALG_DIR/classify.py --dataset_directory=${REPRESENTATION_DIR}/${DATASET}/${REPRESENTATION} \
-#                 --dataset_description=${DATASET_DIR}/${DATASET}/dataset_description_2C.yaml \
-#                 --results_directory=${RESULT_DIR}/${DATASET}_2C/${REPRESENTATION}
+RESULT_DIR=../../results
+DATASETS=('algo/poj' 'algo/codenet' 'optz/anghabench' 'optz/poj' 'optz/poj_s')
+REPRESENTATION='prog2image'
 
 for DATASET in ${DATASETS[@]}
 do
-    mkdir ${RESULT_DIR}/${DATASET}
-    mkdir ${RESULT_DIR}/${DATASET}/${REPRESENTATION}
-    python3 $ALG_DIR/classify.py --dataset_directory=${REPRESENTATION_DIR}/${DATASET}/${REPRESENTATION} \
-            --dataset_description=${DATASET_DIR}/${DATASET}/dataset_description.yaml \
-            --results_directory=${RESULT_DIR}/${DATASET}/${REPRESENTATION}
+  python3 $SCRIPT_FILE ${REPRESENTATION_DIR}/${DATASET}/${REPRESENTATION} \
+          ${DATASET_DIR}/${DATASET}/dataset_description.yaml \
+          ${RESULT_DIR}/${DATASET}/${REPRESENTATION} \
+          --model dcnn \
+          --representation prog2image \
+          --stats \
+          --rounds 10 \
+          --dtype int8
+done
+
+DATASETS=('loop/anghabench')
+
+for DATASET in ${DATASETS[@]}
+do
+  python3 $SCRIPT_FILE ${REPRESENTATION_DIR}/${DATASET}/${REPRESENTATION} \
+          ${DATASET_DIR}/${DATASET}/dataset_description_2C.yaml \
+          ${RESULT_DIR}/${DATASET}_2C/${REPRESENTATION} \
+          --model dcnn \
+          --representation prog2image \
+          --stats \
+          --rounds 10 \
+          --dtype int8
 done

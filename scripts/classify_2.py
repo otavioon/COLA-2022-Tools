@@ -52,8 +52,9 @@ from tensorflow.keras.callbacks import EarlyStopping
 
 from models import create_model_lstm, create_model_dcnn, create_model_gcn, create_model_dgcnn
 
+import tqdm
 
-def load_sequence_dataset(dataset_directory: Path, dataset_description: Path):
+def load_sequence_dataset(dataset_directory: Path, dataset_description: Path, dtype: str = "float32"):
     with dataset_description.open("r") as f:
         description_dataset = yaml.load(f, Loader=yaml.FullLoader)
 
@@ -65,7 +66,7 @@ def load_sequence_dataset(dataset_directory: Path, dataset_description: Path):
     errors = []
 
     for phase, phase_data in description_dataset.items():
-        for label, samples in phase_data.items():
+        for label, samples in tqdm.tqdm(phase_data.items(), desc=f"Loading {phase} data"):
             int_label = int(label)
             labels.append(int_label)
             data_directory = dataset_directory / str(label)
@@ -75,7 +76,7 @@ def load_sequence_dataset(dataset_directory: Path, dataset_description: Path):
                     representation = np.load(filename, allow_pickle=True)
                     representation = representation['values']
                     Y[phase].append(int_label)
-                    X[phase].append(representation)
+                    X[phase].append(representation.astype(dtype))
                 except FileNotFoundError:
                     errors.append(sample)
                     continue
@@ -96,7 +97,7 @@ def load_sequence_dataset(dataset_directory: Path, dataset_description: Path):
 
     return X_train, Y_train, X_val, Y_val, X_test, Y_test, len(labels)
 
-def load_graph_dataset(dataset_directory: Path, dataset_description: Path):
+def load_graph_dataset(dataset_directory: Path, dataset_description: Path, dtype: str = "float32"):
     with dataset_description.open("r") as f:
         description_dataset = yaml.load(f, Loader=yaml.FullLoader)
 
@@ -107,7 +108,7 @@ def load_graph_dataset(dataset_directory: Path, dataset_description: Path):
     errors = list()
 
     for phase, phase_data in description_dataset.items():
-        for label, samples in phase_data.items():
+        for label, samples in tqdm.tqdm(phase_data.items(), desc=f"Loading {phase} data"):
             int_label = int(label)
             labels.append(int_label)
             data_directory = dataset_directory / str(label)
@@ -172,7 +173,8 @@ def main(
         root_dataset_dir: Path, description_file: Path, output_dir: Path,
         model_type: str, representation: str, epochs: int =200,
         patience: int = 20, rounds: int = 1, silent: bool = False,
-        print_model: bool = False, stats: bool = False, batch_size: int = 64):
+        print_model: bool = False, stats: bool = False, batch_size: int = 64,
+        dtype: str = "float32"):
     sequence_representations = [
         'inst2vec', 'ir2vec', 'milepost', 'histogram',
         'lbpeq', 'lbpif', 'prog2image'
@@ -193,14 +195,14 @@ def main(
         X_train, Y_train, X_val, Y_val, X_test, \
         Y_test, labels = load_sequence_dataset(
             dataset_directory=root_dataset_dir,
-            dataset_description=description_file
+            dataset_description=description_file,
+            dtype=dtype
         )
         if representation not in sequence_representations_2d:
             X_train = X_train.reshape(X_train.shape[0], X_train.shape[1], 1)
             X_val = X_val.reshape(X_val.shape[0], X_val.shape[1], 1)
             X_test = X_test.reshape(X_test.shape[0], X_test.shape[1], 1)
         elif model_type != "lstm":
-            print(f"shape of X_train: {X_train.shape}")
             X_train = X_train.reshape(
                 X_train.shape[0], X_train.shape[1], X_train.shape[2], 1
             )
@@ -400,7 +402,7 @@ if __name__ == '__main__':
                         help="Number of epochs to train")
     parser.add_argument("--patience", type=int, default=20,
                         help="Early stop: number of epochs without improvement")
-    parser.add_argument("--batch_size", type=int, default=64,
+    parser.add_argument("--batch_size", type=int, default=16,
                         help="Batch size")
     parser.add_argument("--rounds", type=int, default=1,
                         help="Number of times to repeat the experiment")
@@ -410,6 +412,8 @@ if __name__ == '__main__':
                         help="Print model before train")
     parser.add_argument("--stats", action="store_true",
                         help="Print summary information (confusion matrix, report)")
+    parser.add_argument("--dtype", type=str, default="float32",
+                        help="Default data type")
 
     args = parser.parse_args()
     print(args)
@@ -430,6 +434,7 @@ if __name__ == '__main__':
         silent=args.silent,
         print_model=args.print_model,
         stats=args.stats,
-        batch_size=args.batch_size
+        batch_size=args.batch_size,
+        dtype=args.dtype
     )
     sys.exit(ret_code)
