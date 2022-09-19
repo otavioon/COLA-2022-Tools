@@ -12,5 +12,3 @@ $CONTAINER_CMD run --interactive --tty --rm \
   --workdir $VOLUME_DIR \
   --volume $VOLUME_DIR:$VOLUME_DIR \
   $CONTAINER_IMAGE "$@"
-
-
